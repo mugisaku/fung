@@ -51,7 +51,6 @@ set(SOURCES
   fung_ExpressionMaker.cpp
   fung_statement.cpp
   fung_function.cpp
-  fung_type.cpp
   fung_variable.cpp
   fung_value.cpp
   fung_scope.cpp

@@ -5,6 +5,7 @@
 #include"fung_expression.hpp"
 #include"fung_cursor.hpp"
 #include"fung_TinyString.hpp"
+#include"fung_token.hpp"
 
 
 namespace fung{
@@ -21,11 +22,19 @@ ExpressionMaker
 
   std::vector<Expression>  output;
 
-  bool  last_is_operand = false;
+  bool  need_to_close;
+
+  bool  last_is_operand;
 
   TinyString  last_operator;
 
-  bool  process_operator(Cursor&  cur, TinyString const&  o);
+  void   run_first_phase(Cursor&  cur              );
+  void  step_first_phase(Cursor&  cur, Token&&  tok);
+
+  static Expression   run_last_phase(std::vector<Expression>&&  src                    );
+  static void        step_last_phase(std::vector<Expression>&   buf, Expression&&  expr);
+
+  void  process_operator(Cursor&  cur, TinyString const&  o);
 
   void  push_operand(Expression&&  expr);
 

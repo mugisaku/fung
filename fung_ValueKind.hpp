@@ -2,6 +2,11 @@
 #define FUNG_ValueKind_HPP_INCLUDED
 
 
+#ifndef report
+#define report  printf("[report at %s in %s,%8d]\n",__FILE__,__func__,__LINE__);
+#endif
+
+
 namespace fung{
 
 

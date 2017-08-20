@@ -49,6 +49,10 @@ public:
   Statement&  operator=(Statement const&  rhs) noexcept;
   Statement&  operator=(Statement&&       rhs) noexcept;
 
+  Expression const*  operator->() const{return &expression;}
+
+  bool  operator==(StatementKind  k) const{return kind == k;}
+
   void  clear();
   void  print() const;
 

@@ -163,6 +163,20 @@ main(int  argc, char**  argv)
         if(gscp)
         {
           gscp->print();
+
+
+          auto  v = gscp->find_variable("main");
+
+            if(v)
+            {
+              auto&  fn = v->get_function();
+
+              fn->print();
+
+              printf("\n");
+              (*fn)().print();
+              printf("\n");
+            }
         }
     }
 

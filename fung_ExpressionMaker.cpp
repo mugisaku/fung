@@ -66,7 +66,7 @@ read_either_expression(Cursor&  cur)
 
   auto  l = new Expression(mk(cur));
 
-    if(mk.get_last_operator().compare(':'))
+    if(!mk.get_last_operator().compare(':'))
     {
       throw Error("三項演算の\':\'がない");
     }
@@ -75,6 +75,36 @@ read_either_expression(Cursor&  cur)
   auto  r = new Expression(mk(cur));
 
   return Expression(Mnemonic::eth,l,r);
+}
+
+
+ArgumentList
+read_argument_list(Cursor&  cur)
+{
+  ArgumentList  ls;
+
+    for(;;)
+    {
+      ExpressionMaker  mk;
+
+      auto  expr = mk(cur);
+
+        if(expr)
+        {
+          ls.emplace_back(std::move(expr));
+        }
+
+
+      auto  o = mk.get_last_operator();
+
+        if(!o.compare(','))
+        {
+          break;
+        }
+    }
+
+
+  return std::move(ls);
 }
 
 
@@ -106,10 +136,12 @@ push_operand(Expression&&  expr)
 }
 
 
-bool
+void
 ExpressionMaker::
 process_operator(Cursor&  cur, TinyString const&  o)
 {
+  last_operator = o;
+
     if(o.compare('('))
     {
       ExpressionMaker  mk;
@@ -119,12 +151,33 @@ process_operator(Cursor&  cur, TinyString const&  o)
 
   else
     if(o.compare(';') ||
+       o.compare(',') ||
        o.compare(')') ||
        o.compare(':'))
     {
       last_operator = o;
 
-      return false;
+      need_to_close = true;
+    }
+
+  else
+    if(o.compare('?'))
+    {
+      auto  expr = read_either_expression(cur);
+
+        while(binop_stack.size())
+        {
+          output.emplace_back(binop_stack.back());
+
+          binop_stack.pop_back();
+        }
+
+
+      output.emplace_back(std::move(expr));
+
+      output.emplace_back(Mnemonic::cho);
+
+      need_to_close = true;
     }
 
   else
@@ -146,31 +199,19 @@ process_operator(Cursor&  cur, TinyString const&  o)
       else if(o.compare('*'    )){mn = Mnemonic::mul;}
       else if(o.compare('/'    )){mn = Mnemonic::div;}
       else if(o.compare('%'    )){mn = Mnemonic::rem;}
+      else if(o.compare('|','|')){mn = Mnemonic::log_or;}
       else if(o.compare('|'    )){mn = Mnemonic::bit_or;}
+      else if(o.compare('&','&')){mn = Mnemonic::log_and;}
       else if(o.compare('&'    )){mn = Mnemonic::bit_and;}
       else if(o.compare('^'    )){mn = Mnemonic::bit_xor;}
       else if(o.compare('=','=')){mn = Mnemonic::eq;}
       else if(o.compare('!','=')){mn = Mnemonic::neq;}
-      else if(o.compare('<'    )){mn = Mnemonic::lt;}
-      else if(o.compare('<','=')){mn = Mnemonic::lteq;}
-      else if(o.compare('>'    )){mn = Mnemonic::gt;}
-      else if(o.compare('>','=')){mn = Mnemonic::gteq;}
       else if(o.compare('<','<')){mn = Mnemonic::shl;}
+      else if(o.compare('<','=')){mn = Mnemonic::lteq;}
+      else if(o.compare('<'    )){mn = Mnemonic::lt;}
       else if(o.compare('>','>')){mn = Mnemonic::shr;}
-      else if(o.compare('&','&')){mn = Mnemonic::log_and;}
-      else if(o.compare('|','|')){mn = Mnemonic::log_or;}
-      else if(o.compare('?'    ))
-        {
-          mn = Mnemonic::cho;
-
-
-          auto  expr = read_either_expression(cur);
-
-          output.emplace_back(std::move(expr));
-
-          last_is_operand = true;
-        }
-
+      else if(o.compare('>','=')){mn = Mnemonic::gteq;}
+      else if(o.compare('>'    )){mn = Mnemonic::gt;}
       else
         {
           throw Error(cur,"使えない二項演算子 %s",o.codes);
@@ -189,69 +230,69 @@ process_operator(Cursor&  cur, TinyString const&  o)
 
       last_is_operand = false;
     }
-
-
-  return true;
 }
 
 
-Expression
+void
 ExpressionMaker::
-operator()(Cursor&  cur)
+step_first_phase(Cursor&  cur, Token&&  tok)
 {
-  clear();
+    if(tok == TokenKind::operator_)
+    {
+      process_operator(cur,tok->tiny_string);
+    }
 
-    while(*cur)
+  else
+    if(tok == TokenKind::integer)
+    {
+      Expression  expr(Value(static_cast<int>(tok->integer)));
+
+      push_operand(std::move(expr));
+    }
+
+  else
+    if(tok == TokenKind::string)
+    {
+      Expression  expr(Value(std::move(tok->string)));
+
+      push_operand(std::move(expr));
+    }
+
+  else
+    if(tok == TokenKind::identifier)
+    {
+      auto&  s = tok->string;
+
+           if(s == "true" ){push_operand(Expression(Value( true)));}
+      else if(s == "false"){push_operand(Expression(Value(false)));}
+      else
+        {
+          Identifier  id(std::move(s));
+
+          Expression  expr(std::move(id));
+
+          push_operand(std::move(expr));
+        }
+    }
+
+  else
+    {
+      tok.print();
+
+      throw Error(cur,"式には使えない字句 %d",(int)tok.get_kind());
+    }
+}
+
+
+void
+ExpressionMaker::
+run_first_phase(Cursor&  cur)
+{
+    while(*cur && !need_to_close)
     {
       auto  tok = read_token(cur);
 
-        if(tok == TokenKind::operator_)
-        {
-            if(!process_operator(cur,tok->tiny_string))
-            {
-              break;
-            }
-        }
-
-      else
-        if(tok == TokenKind::integer)
-        {
-          Expression  expr(Value(static_cast<int>(tok->integer)));
-
-          push_operand(std::move(expr));
-        }
-
-      else
-        if(tok == TokenKind::string)
-        {
-          Expression  expr(Value(std::move(tok->string)));
-
-          push_operand(std::move(expr));
-        }
-
-      else
-        if(tok == TokenKind::identifier)
-        {
-          auto&  s = tok->string;
-
-               if(s == "true" ){push_operand(Expression(Value( true)));}
-          else if(s == "false"){push_operand(Expression(Value(false)));}
-          else
-            {
-              Identifier  id(std::move(s));
-
-              Expression  expr(std::move(id));
-
-              push_operand(std::move(expr));
-            }
-        }
-
-      else
-        {
-          tok.print();
-
-          throw Error(cur,"式には使えない字句 %d",(int)tok.get_kind());
-        }
+      step_first_phase(cur,std::move(tok));
     }
 
 
@@ -261,64 +302,91 @@ operator()(Cursor&  cur)
 
       binop_stack.pop_back();
     }
+}
 
 
-  std::vector<Expression>  calc;
-
-    for(auto&  e: output)
+void
+ExpressionMaker::
+step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
+{
+    if((e == ExpressionKind::value     ) ||
+       (e == ExpressionKind::operation ) ||
+       (e == ExpressionKind::identifier))
     {
-        if((e == ExpressionKind::value     ) ||
-           (e == ExpressionKind::identifier))
-        {
-          calc.emplace_back(std::move(e));
-        }
+      buf.emplace_back(std::move(e));
+    }
 
-      else
-        if(e == ExpressionKind::operator_)
+  else
+    if(e == ExpressionKind::operator_)
+    {
+        if(e.is_binary_operator())
         {
-            if(e.is_binary_operator())
+            if(buf.size() < 2)
             {
-                if(calc.size() < 2)
-                {
-                  throw Error(Cursor(),"オペランドが足りない %d",calc.size());
-                }
-
-
-              auto  r = new Expression(std::move(calc.back()));
-
-              calc.pop_back();
-
-              auto  l = new Expression(std::move(calc.back()));
-
-              calc.pop_back();
-
-              calc.emplace_back(e->mnemonic,l,r);
+              throw Error(Cursor(),"オペランドが足りない %d",buf.size());
             }
-        }
 
-      else
-        {
-          throw Error("不明な計算要素");
+
+          auto  r = new Expression(std::move(buf.back()));
+
+          buf.pop_back();
+
+          auto  l = new Expression(std::move(buf.back()));
+
+          buf.pop_back();
+
+          buf.emplace_back(e->mnemonic,l,r);
         }
     }
 
-
-    if(calc.size() != 1)
+  else
     {
-        for(auto&  e: calc)
+      throw Error("不明な計算要素");
+    }
+}
+
+
+
+Expression
+ExpressionMaker::
+run_last_phase(std::vector<Expression>&&  src)
+{
+  std::vector<Expression>  buf;
+
+    for(auto&  e: src)
+    {
+      step_last_phase(buf,std::move(e));
+    }
+
+
+    if(buf.size() > 1)
+    {
+        for(auto&  e: buf)
         {
           e.print();
-      printf("\n");
+          printf("\n");
         }
 
 
       printf("\n");
 
-      throw Error(Cursor(),"演算結果が不正 %d",calc.size());
+      throw Error(Cursor(),"演算結果が不正 %d",buf.size());
     }
 
 
-  return std::move(calc.front());
+  return buf.empty()? Expression():std::move(buf.front());
+}
+
+
+Expression
+ExpressionMaker::
+operator()(Cursor&  cur)
+{
+  clear();
+
+  run_first_phase(cur);
+
+  return run_last_phase(std::move(output));
 }
 
 
@@ -331,6 +399,7 @@ clear()
 
   output.clear();
 
+  need_to_close   = false;
   last_is_operand = false;
 }
 

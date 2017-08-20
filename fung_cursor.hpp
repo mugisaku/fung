@@ -43,6 +43,8 @@ public:
   char const&  operator[](int  i) const{return pointer[i];}
   char const&   operator*() const{return *pointer;}
 
+  operator bool() const{return pointer && *pointer;}
+
   int  get_line_count() const{return line_count;}
   int  get_column_point() const;
 
