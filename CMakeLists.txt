@@ -53,14 +53,14 @@ set(SOURCES
   fung_function.cpp
   fung_variable.cpp
   fung_value.cpp
-  fung_scope.cpp
+  fung_space.cpp
   fung_cursor.cpp
   fung__skip.cpp
   fung_unicode.cpp
   fung_token.cpp
   fung__read_token.cpp
   fung__read_parameter_list.cpp
-  fung__make_global_scope.cpp
+  fung__make_global_space.cpp
 )
 
 

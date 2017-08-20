@@ -2,7 +2,7 @@
 #define FUNG_Expression_HPP_INCLUDED
 
 
-#include"fung_scope.hpp"
+#include"fung_space.hpp"
 #include"fung_value.hpp"
 #include"fung_identifier.hpp"
 
@@ -80,7 +80,7 @@ Expression
   Expression*   left=nullptr;
   Expression*  right=nullptr;
 
-  Value  operate(Scope const&  scope, bool  b) const;
+  Value  operate(Space const&  space, bool  b) const;
 
 public:
   Expression(){}
@@ -107,7 +107,7 @@ public:
   bool  is_binary_operator() const;
   bool          is_operand() const;
 
-  Value  evaluate(Scope const&  scope, bool  b=true) const;
+  Value  evaluate(Space const&  space, bool  b=true) const;
 
   void  print() const;
 

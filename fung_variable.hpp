@@ -12,7 +12,7 @@ namespace fung{
 
 
 class Function;
-class Scope;
+class Space;
 
 
 class
@@ -49,7 +49,7 @@ public:
 
   std::unique_ptr<Function> const&  get_function() const{return function;}
 
-  Value  get_value(Scope const&  scope) const;
+  Value  get_value(Space const&  sp) const;
 
   void  print() const;
 

@@ -154,18 +154,18 @@ main(int  argc, char**  argv)
 
   Cursor  cur(s.data(),new std::string(in_path));
 
-  std::unique_ptr<Scope>  gscp;
+  std::unique_ptr<Space>  gsp;
 
     try
     {
-      gscp = make_global_scope(cur);
+      gsp = make_global_space(cur);
 
-        if(gscp)
+        if(gsp)
         {
-          gscp->print();
+          gsp->print();
 
 
-          auto  v = gscp->find_variable("main");
+          auto  v = gsp->find_variable("main");
 
             if(v)
             {

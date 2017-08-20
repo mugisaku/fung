@@ -1,5 +1,5 @@
-#ifndef FUNG_Scope_HPP_INCLUDED
-#define FUNG_Scope_HPP_INCLUDED
+#ifndef FUNG_Space_HPP_INCLUDED
+#define FUNG_Space_HPP_INCLUDED
 
 
 #include<vector>
@@ -14,16 +14,16 @@ class Variable;
 
 
 class
-Scope
+Space
 {
-  Scope*  parent=nullptr;
+  Space*  parent=nullptr;
 
   std::list<Variable>  variable_list;
 
-  std::vector<std::unique_ptr<Scope>>  children;
+  std::vector<std::unique_ptr<Space>>  children;
 
 public:
-  Scope(Scope*  parent_=nullptr): parent(parent_){}
+  Space(Space*  parent_=nullptr): parent(parent_){}
 
   void  append_variable(Variable&&  v);
 

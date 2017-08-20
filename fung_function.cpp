@@ -9,7 +9,7 @@ namespace fung{
 
 Value
 Function::
-operator()(ArgumentList const&  args)
+operator()(std::initializer_list<Value>  argument_value_list)
 {
     for(auto&  stmt: body)
     {

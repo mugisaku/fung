@@ -1,4 +1,4 @@
-#include"fung_scope.hpp"
+#include"fung_space.hpp"
 #include"fung_token.hpp"
 #include"fung_cursor.hpp"
 #include"fung_variable.hpp"
@@ -92,7 +92,7 @@ read_function_body(Cursor&  cur)
 
 
 void
-process_function(Cursor&  cur, std::unique_ptr<Scope>&  scp)
+process_function(Cursor&  cur, std::unique_ptr<Space>&  sp)
 {
   auto  next_tok = read_token(cur);
 
@@ -148,7 +148,7 @@ process_function(Cursor&  cur, std::unique_ptr<Scope>&  scp)
 
           auto  fn = new Function(std::move(parals),std::move(return_type),std::move(body));
 
-          scp->append_variable(Variable(std::move(id),fn));
+          sp->append_variable(Variable(std::move(id),fn));
         }
 
       else
@@ -165,7 +165,7 @@ process_function(Cursor&  cur, std::unique_ptr<Scope>&  scp)
 
 
 void
-process_object(Cursor&  cur, std::unique_ptr<Scope>&  scp)
+process_object(Cursor&  cur, std::unique_ptr<Space>&  sp)
 {
 }
 
@@ -173,10 +173,10 @@ process_object(Cursor&  cur, std::unique_ptr<Scope>&  scp)
 }
 
 
-std::unique_ptr<Scope>
-make_global_scope(Cursor&  cur)
+std::unique_ptr<Space>
+make_global_space(Cursor&  cur)
 {
-  auto  gscp = std::make_unique<Scope>();
+  auto  gsp = std::make_unique<Space>();
 
     while(*cur)
     {
@@ -188,10 +188,10 @@ make_global_scope(Cursor&  cur)
             {
               auto&  id = tok->string;
 
-                if(id == "function"){process_function(cur,gscp);}
+                if(id == "function"){process_function(cur,gsp);}
               else
                 {
-                  auto  v = gscp->find_variable(id);
+                  auto  v = gsp->find_variable(id);
 
                     if(v)
                     {
@@ -216,7 +216,7 @@ make_global_scope(Cursor&  cur)
     }
 
 
-  return std::move(gscp);
+  return std::move(gsp);
 }
 
 

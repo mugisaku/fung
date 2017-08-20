@@ -137,18 +137,18 @@ clear()
 
 Value
 Expression::
-operate(Scope const&  scope, bool  b) const
+operate(Space const&  space, bool  b) const
 {
   auto&  mnemonic = data.mnemonic;
 
     if(mnemonic == Mnemonic::eth)
     {
-        if(b){return  left->evaluate(scope);}
-      else   {return right->evaluate(scope);}
+        if(b){return  left->evaluate(space);}
+      else   {return right->evaluate(space);}
     }
 
   
-  auto  lv = left->evaluate(scope);
+  auto  lv = left->evaluate(space);
 
     if(mnemonic == Mnemonic::cho)
     {
@@ -160,7 +160,7 @@ operate(Scope const&  scope, bool  b) const
         }
 
 
-      return right->evaluate(scope,b->boolean);
+      return right->evaluate(space,b->boolean);
     }
 
   else
@@ -180,7 +180,7 @@ operate(Scope const&  scope, bool  b) const
         }
 
 
-      auto  rv = right->evaluate(scope);
+      auto  rv = right->evaluate(space);
 
       return rv.to_boolean();
     }
@@ -202,7 +202,7 @@ operate(Scope const&  scope, bool  b) const
         }
 
 
-      auto  rv = right->evaluate(scope);
+      auto  rv = right->evaluate(space);
 
       return rv.to_boolean();
     }
@@ -214,7 +214,7 @@ operate(Scope const&  scope, bool  b) const
   else if(mnemonic == Mnemonic::bit_not){return ~lv;}
 
 
-  auto  rv = right->evaluate(scope);
+  auto  rv = right->evaluate(space);
 
     switch(mnemonic)
     {
@@ -312,7 +312,7 @@ is_operand() const
 
 Value
 Expression::
-evaluate(Scope const&  scope, bool  b) const
+evaluate(Space const&  space, bool  b) const
 {
     switch(kind)
     {
@@ -321,14 +321,14 @@ evaluate(Scope const&  scope, bool  b) const
       throw Error("未定義の値");
       break;
   case(ExpressionKind::operation):
-      return operate(scope,b);
+      return operate(space,b);
       break;
   case(ExpressionKind::value):
       return data.value;
       break;
   case(ExpressionKind::identifier):
       {
-        auto  v = scope.find_variable(data.identifier.string);
+        auto  v = space.find_variable(data.identifier.string);
 
           if(!v)
           {
@@ -336,7 +336,7 @@ evaluate(Scope const&  scope, bool  b) const
           }
 
 
-        return v->get_value(scope);
+        return v->get_value(space);
       }
       break;
     }

@@ -1,4 +1,4 @@
-#include"fung_scope.hpp"
+#include"fung_space.hpp"
 #include"fung_variable.hpp"
 #include"fung_function.hpp"
 
@@ -11,7 +11,7 @@ namespace fung{
 
 
 void
-Scope::
+Space::
 append_variable(Variable&&  v)
 {
   variable_list.emplace_back(std::move(v));
@@ -19,7 +19,7 @@ append_variable(Variable&&  v)
 
 
 Variable const*
-Scope::
+Space::
 find_variable(std::string const&  name) const
 {
     for(auto&  v: variable_list)
@@ -38,7 +38,7 @@ find_variable(std::string const&  name) const
 
 
 void
-Scope::
+Space::
 print() const
 {
     for(auto&  v: variable_list)

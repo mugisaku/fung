@@ -1,6 +1,6 @@
 #include"fung_variable.hpp"
 #include"fung_function.hpp"
-#include"fung_scope.hpp"
+#include"fung_space.hpp"
 
 
 
@@ -10,7 +10,7 @@ namespace fung{
 
 Value
 Variable::
-get_value(Scope const&  scope) const
+get_value(Space const&  sp) const
 {
     if(function)
     {
@@ -19,7 +19,7 @@ get_value(Scope const&  scope) const
 
   else
     {
-      return expression.evaluate(scope);
+      return expression.evaluate(sp);
     }
 }
 

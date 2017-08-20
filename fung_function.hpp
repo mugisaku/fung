@@ -5,7 +5,8 @@
 #include"fung_variable.hpp"
 #include"fung_statement.hpp"
 #include"fung_expression.hpp"
-#include"fung_scope.hpp"
+#include"fung_space.hpp"
+#include<initializer_list>
 
 
 namespace fung{
@@ -18,7 +19,7 @@ using FunctionBody = std::vector<Statement>;
 
 
 class
-Function: public Scope
+Function: public Space
 {
   ParameterList  parameter_list;
 
@@ -33,7 +34,7 @@ public:
   body(std::move(body_)){}
 
 
-  Value  operator()(ArgumentList const&  args=ArgumentList());
+  Value  operator()(std::initializer_list<Value>  argument_value_list={});
 
   bool  test_argument_list(ArgumentList const&  args) const;
 
