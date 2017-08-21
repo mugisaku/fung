@@ -1,5 +1,5 @@
 #include"fung_function.hpp"
-#include"fung_variable.hpp"
+#include"fung_error.hpp"
 
 
 
@@ -9,16 +9,42 @@ namespace fung{
 
 Value
 Function::
-operator()(std::initializer_list<Value>  argument_value_list)
+operator()(Context&  ctx, std::initializer_list<Value>  args) const
 {
+    if(parameter_list.size() != args.size())
+    {
+      throw Error("引数の数が一致しない");
+    }
+
+
+  Frame  frame(*this);
+
+  auto  it = args.begin();
+
+    for(auto&  para: parameter_list)
+    {
+        if(para.get_value_kind() != it->get_kind())
+        {
+          throw Error("引数の型が一致しない");
+        }
+
+
+      frame.append(para.get_name(),*it++);
+    }
+
+
+  ctx.push_frame(std::move(frame));
+
     for(auto&  stmt: body)
     {
         if(stmt == StatementKind::return_)
         {
-          return stmt->evaluate(*this);
+          return stmt->evaluate(ctx);
         }
     }
 
+
+  ctx.pop_frame();
 
   return Value();
 }
@@ -26,35 +52,11 @@ operator()(std::initializer_list<Value>  argument_value_list)
 
 
 
-bool
-Function::
-test_argument_list(ArgumentList const&  args) const
-{
-    if(parameter_list.size() == args.size())
-    {
-      auto  a =           args.cbegin();
-      auto  p = parameter_list.cbegin();
-
-      auto  n = args.size();
-
-        while(n--)
-        {
-        }
-
-
-      return true;
-    }
-
-
-  return false;
-}
-
-
 void
 Function::
 print() const
 {
-  printf("function(");
+  printf("function %s(",name.data());
 
   auto        it = parameter_list.cbegin();
   auto const end = parameter_list.cend();

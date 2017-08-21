@@ -1,9 +1,6 @@
-#include"fung_space.hpp"
+#include"fung_GlobalSpace.hpp"
 #include"fung_token.hpp"
-#include"fung_cursor.hpp"
-#include"fung_variable.hpp"
-#include"fung_alias.hpp"
-#include"fung_object.hpp"
+#include"fung_error.hpp"
 #include"fung_function.hpp"
 #include"fung_ExpressionMaker.hpp"
 
@@ -92,7 +89,7 @@ read_function_body(Cursor&  cur)
 
 
 void
-process_function(Cursor&  cur, std::unique_ptr<Space>&  sp)
+process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
 {
   auto  next_tok = read_token(cur);
 
@@ -146,9 +143,7 @@ process_function(Cursor&  cur, std::unique_ptr<Space>&  sp)
             }
 
 
-          auto  fn = new Function(std::move(parals),std::move(return_type),std::move(body));
-
-          sp->append_variable(Variable(std::move(id),fn));
+          gsp->append_function(new Function(*gsp,std::move(id),std::move(parals),std::move(return_type),std::move(body)));
         }
 
       else
@@ -165,7 +160,7 @@ process_function(Cursor&  cur, std::unique_ptr<Space>&  sp)
 
 
 void
-process_object(Cursor&  cur, std::unique_ptr<Space>&  sp)
+process_object(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
 {
 }
 
@@ -173,10 +168,10 @@ process_object(Cursor&  cur, std::unique_ptr<Space>&  sp)
 }
 
 
-std::unique_ptr<Space>
+std::unique_ptr<GlobalSpace>
 make_global_space(Cursor&  cur)
 {
-  auto  gsp = std::make_unique<Space>();
+  auto  gsp = std::make_unique<GlobalSpace>();
 
     while(*cur)
     {
@@ -191,9 +186,9 @@ make_global_space(Cursor&  cur)
                 if(id == "function"){process_function(cur,gsp);}
               else
                 {
-                  auto  v = gsp->find_variable(id);
+                  auto  fn = gsp->find_function(id);
 
-                    if(v)
+                    if(fn)
                     {
                     }
 

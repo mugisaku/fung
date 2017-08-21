@@ -11,23 +11,18 @@ namespace fung{
 
 
 class Variable;
+class GlobalSpace;
 
 
 class
 Space
 {
+  GlobalSpace*  global=nullptr;
+
   Space*  parent=nullptr;
 
-  std::list<Variable>  variable_list;
-
-  std::vector<std::unique_ptr<Space>>  children;
-
 public:
-  Space(Space*  parent_=nullptr): parent(parent_){}
-
-  void  append_variable(Variable&&  v);
-
-  Variable const*  find_variable(std::string const&  name) const;
+  Space(Space&  parent_);
 
   void  print() const;
 

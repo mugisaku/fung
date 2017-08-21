@@ -1,4 +1,5 @@
 #include"fung_cursor.hpp"
+#include"fung_error.hpp"
 
 
 namespace fung{

@@ -154,7 +154,7 @@ main(int  argc, char**  argv)
 
   Cursor  cur(s.data(),new std::string(in_path));
 
-  std::unique_ptr<Space>  gsp;
+  std::unique_ptr<GlobalSpace>  gsp;
 
     try
     {
@@ -165,16 +165,18 @@ main(int  argc, char**  argv)
           gsp->print();
 
 
-          auto  v = gsp->find_variable("main");
+          auto  fn = gsp->find_function("main");
 
-            if(v)
+            if(fn)
             {
-              auto&  fn = v->get_function();
+              Context  ctx;
 
               fn->print();
 
               printf("\n");
-              (*fn)().print();
+
+              (*fn)(ctx,{Value(128),Value(32)}).print();
+
               printf("\n");
             }
         }

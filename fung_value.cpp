@@ -1,6 +1,5 @@
 #include"fung_value.hpp"
 #include"fung_function.hpp"
-#include"fung_variable.hpp"
 
 
 
@@ -172,8 +171,10 @@ print() const
     switch(kind)
     {
   case(ValueKind::null):
+      printf("NULL ");
       break;
   case(ValueKind::undefined):
+      printf("UNDEFINED ");
       break;
   case(ValueKind::boolean):
       printf("%s",data.boolean? "true":"false");

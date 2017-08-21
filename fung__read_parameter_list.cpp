@@ -1,6 +1,7 @@
 #include"fung.hpp"
 #include"fung_identifier.hpp"
-#include"fung_variable.hpp"
+#include"fung_parameter.hpp"
+#include"fung_error.hpp"
 
 
 
@@ -25,7 +26,7 @@ to_value_kind(std::string const&  id)
 }
 
 
-Variable
+Parameter
 read_parameter(Cursor&  cur)
 {
   auto  type_name = read_identifier(cur);
@@ -44,7 +45,7 @@ read_parameter(Cursor&  cur)
 
   auto  variable_name = read_identifier(cur);
 
-  return Variable(vk,std::move(variable_name));
+  return Parameter(vk,std::move(variable_name));
 }
 
 

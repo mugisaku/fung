@@ -4,6 +4,7 @@
 #include<cctype>
 #include<vector>
 #include"fung_token.hpp"
+#include"fung_error.hpp"
 
 
 namespace fung{

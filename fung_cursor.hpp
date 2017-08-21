@@ -5,8 +5,6 @@
 #include<string>
 #include<cstring>
 #include<cstdio>
-#include<cstdarg>
-#include<exception>
 
 
 #ifndef report
@@ -71,38 +69,6 @@ void  skip_spaces_and_newline(Cursor&  cur);
 
 void  skip_blockstyle_comment(Cursor&  cur);
 void  skip_linestyle_comment( Cursor&  cur);
-
-
-struct
-Error: public std::exception
-{
-  Cursor const  cursor;
-
-  char  buffer[256];
-
-  Error(char const*  fmt="", ...)
-  {
-    va_list  ap;
-    va_start(ap,fmt);
-
-    vsnprintf(buffer,sizeof(buffer),fmt,ap);
-
-    va_end(ap);
-  }
-
-  Error(Cursor const&  cur, char const*  fmt="", ...): cursor(cur)
-  {
-    va_list  ap;
-    va_start(ap,fmt);
-
-    vsnprintf(buffer,sizeof(buffer),fmt,ap);
-
-    va_end(ap);
-  }
-
-  char const*  what() noexcept{return buffer;}
-
-};
 
 
 }

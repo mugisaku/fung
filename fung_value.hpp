@@ -96,6 +96,8 @@ public:
 
   void  clear();
 
+  ValueKind  get_kind() const{return kind;}
+
   Value  to_boolean() const;
 
   void  print() const;

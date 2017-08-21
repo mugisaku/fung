@@ -2,6 +2,8 @@
 #include"fung_token.hpp"
 #include"fung_function.hpp"
 #include"fung_identifier.hpp"
+#include"fung_GlobalSpace.hpp"
+#include"fung_error.hpp"
 #include<cstdlib>
 
 
@@ -150,9 +152,18 @@ process_operator(Cursor&  cur, TinyString const&  o)
     }
 
   else
+    if(o.compare('['))
+    {
+      ExpressionMaker  mk;
+
+      push_operand(mk(cur));
+    }
+
+  else
     if(o.compare(';') ||
        o.compare(',') ||
        o.compare(')') ||
+       o.compare(']') ||
        o.compare(':'))
     {
       last_operator = o;

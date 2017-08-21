@@ -2,14 +2,15 @@
 #define FUNG_Expression_HPP_INCLUDED
 
 
-#include"fung_space.hpp"
 #include"fung_value.hpp"
 #include"fung_identifier.hpp"
+#include<vector>
 
 
 namespace fung{
 
 
+class Context;
 
 
 enum class
@@ -39,6 +40,8 @@ Mnemonic
   neg,
   cho,
   eth,
+  sus,
+  cal,
 
 };
 
@@ -80,7 +83,7 @@ Expression
   Expression*   left=nullptr;
   Expression*  right=nullptr;
 
-  Value  operate(Space const&  space, bool  b) const;
+  Value  operate(Context const&  ctx, bool  b) const;
 
 public:
   Expression(){}
@@ -107,7 +110,7 @@ public:
   bool  is_binary_operator() const;
   bool          is_operand() const;
 
-  Value  evaluate(Space const&  space, bool  b=true) const;
+  Value  evaluate(Context const&  ctx, bool  b=true) const;
 
   void  print() const;
 

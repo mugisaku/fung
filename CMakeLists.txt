@@ -48,12 +48,15 @@ endif()
 set(SOURCES
   fung.cpp
   fung_expression.cpp
+  fung_expression__evaluate.cpp
   fung_ExpressionMaker.cpp
   fung_statement.cpp
   fung_function.cpp
-  fung_variable.cpp
+  fung_parameter.cpp
   fung_value.cpp
   fung_space.cpp
+  fung_context.cpp
+  fung_GlobalSpace.cpp
   fung_cursor.cpp
   fung__skip.cpp
   fung_unicode.cpp

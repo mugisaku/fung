@@ -1,22 +1,17 @@
-#ifndef FUNG_Variable_HPP_INCLUDED
-#define FUNG_Variable_HPP_INCLUDED
+#ifndef FUNG_Parameter_HPP_INCLUDED
+#define FUNG_Parameter_HPP_INCLUDED
 
 
 #include"fung_ValueKind.hpp"
 #include"fung_expression.hpp"
-#include<memory>
 #include<vector>
 
 
 namespace fung{
 
 
-class Function;
-class Space;
-
-
 class
-Variable
+Parameter
 {
   ValueKind  value_kind;
 
@@ -24,18 +19,11 @@ Variable
 
   Expression  expression;
 
-  std::unique_ptr<Function>  function;
-
 public:
-  Variable(ValueKind  k, std::string&&  name_, Expression&&  expr=Expression()):
+  Parameter(ValueKind  k, std::string&&  name_, Expression&&  expr=Expression()):
   value_kind(k),
   name(std::move(name_)),
   expression(std::move(expr)){}
-
-  Variable(std::string&&  name_, Function*  fn):
-  value_kind(ValueKind::function),
-  name(std::move(name_)),
-  function(fn){}
 
   bool  operator==(std::string const&  name_) const{return name == name_;}
 
@@ -47,16 +35,12 @@ public:
 
   Expression const&  get_expression() const{return expression;}
 
-  std::unique_ptr<Function> const&  get_function() const{return function;}
-
-  Value  get_value(Space const&  sp) const;
-
   void  print() const;
 
 };
 
 
-using ParameterList = std::vector<Variable>;
+using ParameterList = std::vector<Parameter>;
 
 
 class Cursor;
