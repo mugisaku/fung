@@ -57,6 +57,7 @@ public:
   ValueData const*  operator->() const{return &data;}
 
   bool  operator==(ValueKind   k) const{return kind == k;}
+  bool  operator!=(ValueKind   k) const{return kind != k;}
 
   bool  is_undefined() const{return kind == ValueKind::undefined;}
 

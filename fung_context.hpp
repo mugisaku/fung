@@ -3,13 +3,17 @@
 
 
 #include"fung_value.hpp"
+#include"fung_error.hpp"
 #include<vector>
+#include<memory>
 
 
 namespace fung{
 
 
 class GlobalSpace;
+class Expression;
+class Function;
 
 
 struct
@@ -19,7 +23,7 @@ Variable
 
   Value  value;
 
-  Variable(std::string const&  name_, Value&&  v): name(name_), value(v){}
+  Variable(std::string const&  name_, Value const&  v): name(name_), value(v){}
 
 };
 
@@ -33,9 +37,18 @@ Frame
 
   Frame(Function const&  fn): function(fn){}
 
-  void  append(std::string const&  name, Value  value)
+  void  append(Variable&&  var)
   {
-    variable_list.emplace_back(name,std::move(value));
+     for(auto&  v: variable_list)
+     {
+         if(v.name == var.name)
+         {
+           throw Error("すでに%sという名前の変数がある",var.name.data());
+         }
+     }
+
+
+    variable_list.emplace_back(std::move(var));
   }
 
 };
@@ -48,13 +61,22 @@ Context
 
   std::vector<Frame>  frame_stack;
 
+  Value  returned_value;
+
 public:
-  Context(GlobalSpace const*  gsp=nullptr): global_space(gsp){}
+  Context(std::unique_ptr<GlobalSpace> const&  gsp): global_space(gsp.get()){}
 
   std::vector<Frame> const*  operator->() const{return &frame_stack;}
 
-  void  push_frame(Frame&&  frame);
-  void  pop_frame();
+  void  enter(Function const&  fn);
+  void  leave();
+
+  void  entry(std::string const&  name, Expression const&  expr);
+  void  entry(std::string const&  name, Value const&  val);
+
+  void  hold_returned_value(Value  value){returned_value = value;}
+
+  Value const&  get_returned_value() const{return returned_value;}
 
   Value  find_value(std::string const&  name) const;
 

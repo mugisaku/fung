@@ -13,17 +13,33 @@ namespace fung{
 
 void
 Context::
-push_frame(Frame&&  frame)
+enter(Function const&  fn)
 {
-  frame_stack.emplace_back(std::move(frame));
+  frame_stack.emplace_back(fn);
 }
 
 
 void
 Context::
-pop_frame()
+leave()
 {
   frame_stack.pop_back();
+}
+
+
+void
+Context::
+entry(std::string const&  name, Expression const&  expr)
+{
+  frame_stack.back().append(Variable(name,expr.evaluate(*this)));
+}
+
+
+void
+Context::
+entry(std::string const&  name, Value const&  val)
+{
+  frame_stack.back().append(Variable(name,val));
 }
 
 
@@ -50,6 +66,12 @@ Value
 Context::
 operator[](std::string const&  name) const
 {
+    if(frame_stack.empty())
+    {
+      throw Error("フレームが無い");
+    }
+
+
   auto&  f = frame_stack.back();
 
     for(auto&  var: f.variable_list)
@@ -61,11 +83,14 @@ operator[](std::string const&  name) const
     }
 
 
-  auto  fn = global_space->find_function(name);
-
-    if(fn)
+    if(global_space)
     {
-      return Value(fn);
+      auto  fn = global_space->find_function(name);
+
+        if(fn)
+        {
+          return Value(fn);
+        }
     }
 
 

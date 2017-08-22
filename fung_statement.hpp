@@ -11,12 +11,28 @@ namespace fung{
 
 
 
+class Context;
+
+
 enum class
 StatementKind
 {
   null,
-  bind,
+
+  let,
   return_,
+
+};
+
+
+struct
+LetStatement
+{
+  std::string  identifier;
+
+  Expression  expression;
+
+  LetStatement(std::string&&  id, Expression&&  expr): identifier(std::move(id)), expression(std::move(expr)){}
 
 };
 
@@ -41,6 +57,7 @@ Statement
 
 public:
   Statement(){}
+  Statement(LetStatement&&  bin);
   Statement(ReturnStatement&&  ret);
   Statement(Statement const&  rhs) noexcept{*this = rhs;}
   Statement(Statement&&       rhs) noexcept{*this = std::move(rhs);}
@@ -53,7 +70,11 @@ public:
 
   bool  operator==(StatementKind  k) const{return kind == k;}
 
+
   void  clear();
+
+  bool  execute(Context&  ctx) const;
+
   void  print() const;
 
 };

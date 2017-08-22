@@ -11,6 +11,9 @@ namespace fung{
 
 
 class Context;
+class Expression;
+
+using ExpressionList = std::vector<Expression>;
 
 
 enum class
@@ -57,6 +60,8 @@ ExpressionKind
 
   value,
   identifier,
+
+  list,
  
 };
 
@@ -67,6 +72,8 @@ ExpressionData
   Mnemonic      mnemonic;
   Value            value;
   Identifier  identifier;
+
+  std::vector<Expression>  list;
 
   ExpressionData(){}
  ~ExpressionData(){}
@@ -83,13 +90,14 @@ Expression
   Expression*   left=nullptr;
   Expression*  right=nullptr;
 
-  Value  operate(Context const&  ctx, bool  b) const;
+  Value  operate(Context&  ctx, bool  b) const;
 
 public:
   Expression(){}
   explicit Expression(ExpressionKind  k): kind(k){}
   explicit Expression(Identifier&&  id);
   explicit Expression(Value&&  v);
+  explicit Expression(ExpressionList&&  ls);
   Expression(Mnemonic  mn, Expression*  l=nullptr, Expression*  r=nullptr);
   Expression(Expression const&  rhs) noexcept{*this = rhs;}
   Expression(Expression&&       rhs) noexcept{*this = std::move(rhs);}
@@ -99,6 +107,7 @@ public:
   Expression&  operator=(Expression&&       rhs) noexcept;
 
   bool  operator==(ExpressionKind  k) const{return kind == k;}
+  bool  operator!=(ExpressionKind  k) const{return kind != k;}
 
   operator bool() const{return kind != ExpressionKind::null;}
 
@@ -110,7 +119,7 @@ public:
   bool  is_binary_operator() const;
   bool          is_operand() const;
 
-  Value  evaluate(Context const&  ctx, bool  b=true) const;
+  Value  evaluate(Context&  ctx, bool  b=true) const;
 
   void  print() const;
 

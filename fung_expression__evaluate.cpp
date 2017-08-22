@@ -13,7 +13,7 @@ namespace fung{
 
 Value
 Expression::
-operate(Context const&  ctx, bool  b) const
+operate(Context&  ctx, bool  b) const
 {
   auto&  mnemonic = data.mnemonic;
 
@@ -90,6 +90,26 @@ operate(Context const&  ctx, bool  b) const
   else if(mnemonic == Mnemonic::bit_not){return ~lv;}
 
 
+    if(mnemonic == Mnemonic::cal)
+    {
+        if(lv != ValueKind::function)
+        {
+          throw Error("関数呼び出しの左辺が関数参照ではない");
+        }
+
+
+        if((*right) != ExpressionKind::list)
+        {
+          throw Error("関数呼び出しの右辺が引数リストではない");
+        }
+
+
+      
+
+      return (*lv->function)(ctx,right->data.list);
+    }
+
+
   auto  rv = right->evaluate(ctx);
 
     switch(mnemonic)
@@ -126,6 +146,10 @@ operate(Context const&  ctx, bool  b) const
   case(Mnemonic::lteq   ): return lv <= rv;
   case(Mnemonic::gt     ): return lv >  rv;
   case(Mnemonic::gteq   ): return lv >= rv;
+  case(Mnemonic::sus):
+      {
+      }
+      break;
   default:
       throw Error(Cursor(),"");
     }
@@ -137,7 +161,7 @@ operate(Context const&  ctx, bool  b) const
 
 Value
 Expression::
-evaluate(Context const&  ctx, bool  b) const
+evaluate(Context&  ctx, bool  b) const
 {
     switch(kind)
     {

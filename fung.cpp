@@ -169,13 +169,13 @@ main(int  argc, char**  argv)
 
             if(fn)
             {
-              Context  ctx;
+              Context  ctx(gsp);
 
               fn->print();
 
               printf("\n");
 
-              (*fn)(ctx,{Value(128),Value(32)}).print();
+              (*fn)(ctx,{Value(7),Value(32)}).print();
 
               printf("\n");
             }

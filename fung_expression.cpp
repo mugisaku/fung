@@ -28,6 +28,14 @@ kind(ExpressionKind::value)
 
 
 Expression::
+Expression(ExpressionList&&  ls):
+kind(ExpressionKind::list)
+{
+  new(&data) ExpressionList(std::move(ls));
+}
+
+
+Expression::
 Expression(Mnemonic  mn, Expression*  l, Expression*  r):
 kind(l? ExpressionKind::operation:ExpressionKind::operator_),
 left(l),
@@ -61,6 +69,9 @@ operator=(Expression const&  rhs) noexcept
   case(ExpressionKind::identifier):
       new(&data) Identifier(rhs.data.identifier);
       break;
+  case(ExpressionKind::list):
+      new(&data) ExpressionList(rhs.data.list);
+      break;
     }
 
 
@@ -93,6 +104,9 @@ operator=(Expression&&  rhs) noexcept
   case(ExpressionKind::identifier):
       new(&data) Identifier(std::move(rhs.data.identifier));
       break;
+  case(ExpressionKind::list):
+      new(&data) ExpressionList(std::move(rhs.data.list));
+      break;
     }
 
 
@@ -120,6 +134,9 @@ clear()
       break;
   case(ExpressionKind::identifier):
       data.identifier.~Identifier();
+      break;
+  case(ExpressionKind::list):
+      data.list.~vector();
       break;
     }
 
@@ -226,6 +243,28 @@ print() const
   case(ExpressionKind::identifier):
       printf("%s",data.identifier->data());
       break;
+  case(ExpressionKind::list):
+      printf("(");
+
+        {
+          auto   it = data.list.cbegin();
+          auto  end = data.list.cend();
+
+            if(it != end)
+            {
+              it++->print();
+
+                while(it != end)
+                {
+                  printf(",");
+
+                  it++->print();
+                }
+            }
+        }
+
+      printf(")");
+      break;
     }
 }
 
@@ -262,8 +301,8 @@ print_mnemonic(Mnemonic  mn)
   case(Mnemonic::neg): s = "-";break;
   case(Mnemonic::cho): s = "?";break;
   case(Mnemonic::eth): s = ":";break;
-  case(Mnemonic::sus): s = "";break;
-  case(Mnemonic::cal): s = "";break;
+  case(Mnemonic::sus): s = "[]";break;
+  case(Mnemonic::cal): s = "()";break;
     }
 
 

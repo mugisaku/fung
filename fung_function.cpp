@@ -11,13 +11,39 @@ Value
 Function::
 operator()(Context&  ctx, std::initializer_list<Value>  args) const
 {
+  std::vector<Value>  buf = args;
+
+  return (*this)(ctx,buf);
+}
+
+
+Value
+Function::
+operator()(Context&  ctx, ExpressionList const&  args) const
+{
+  std::vector<Value>  buf;
+
+    for(auto&  expr: args)
+    {
+      buf.emplace_back(expr.evaluate(ctx));
+    }
+
+
+  return (*this)(ctx,buf);
+}
+
+
+Value
+Function::
+operator()(Context&  ctx, std::vector<Value> const&  args) const
+{
     if(parameter_list.size() != args.size())
     {
       throw Error("引数の数が一致しない");
     }
 
 
-  Frame  frame(*this);
+  ctx.enter(*this);
 
   auto  it = args.begin();
 
@@ -29,27 +55,23 @@ operator()(Context&  ctx, std::initializer_list<Value>  args) const
         }
 
 
-      frame.append(para.get_name(),*it++);
+      ctx.entry(para.get_name(),*it++);
     }
 
 
-  ctx.push_frame(std::move(frame));
-
     for(auto&  stmt: body)
     {
-        if(stmt == StatementKind::return_)
+        if(!stmt.execute(ctx))
         {
-          return stmt->evaluate(ctx);
+          break;
         }
     }
 
 
-  ctx.pop_frame();
+  ctx.leave();
 
-  return Value();
+  return ctx.get_returned_value();
 }
-
-
 
 
 void
@@ -79,10 +101,12 @@ print() const
     for(auto&  stmt: body)
     {
       stmt.print();
+
+      printf("\n");
     }
 
 
-  printf("\n}\n\n");
+  printf("}\n\n");
 }
 
 

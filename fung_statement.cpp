@@ -9,7 +9,21 @@ namespace fung{
 
 
 
-Statement::Statement(ReturnStatement&&  ret): kind(StatementKind::return_), expression(std::move(ret.expression)){}
+Statement::
+Statement(LetStatement&&  bin):
+kind(StatementKind::let),
+identifier(std::move(bin.identifier)),
+expression(std::move(bin.expression))
+{
+}
+
+
+Statement::
+Statement(ReturnStatement&&  ret):
+kind(StatementKind::return_),
+expression(std::move(ret.expression))
+{
+}
 
 
  
@@ -52,7 +66,7 @@ clear()
     {
   case(StatementKind::null):
       break;
-  case(StatementKind::bind):
+  case(StatementKind::let):
       break;
   case(StatementKind::return_):
       break;
@@ -60,6 +74,31 @@ clear()
 
 
   kind = StatementKind::null;
+}
+
+
+
+
+bool
+Statement::
+execute(Context&  ctx) const
+{
+    switch(kind)
+    {
+  case(StatementKind::null):
+      break;
+  case(StatementKind::let):
+      ctx.entry(identifier,expression);
+      break;
+  case(StatementKind::return_):
+      ctx.hold_returned_value(expression.evaluate(ctx));
+
+      return false;
+      break;
+    }
+
+
+  return true;
 }
 
 
@@ -74,8 +113,8 @@ print() const
   case(StatementKind::null):
       printf("NULL_STMT ");
       break;
-  case(StatementKind::bind):
-      printf("bind %s = ",identifier.data());
+  case(StatementKind::let):
+      printf("let  %s = ",identifier.data());
 
       expression.print();
       break;

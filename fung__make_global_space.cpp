@@ -18,34 +18,56 @@ read_statement(Cursor&  cur)
 {
   Statement  stmt;
 
-    for(;;)
+  skip_spaces_and_newline(cur);
+
+    if(isident0(*cur))
     {
-      skip_spaces_and_newline(cur);
+      auto  id = read_identifier(cur);
 
-        if(isident0(*cur))
+        if(id == "return")
         {
-          auto  id = read_identifier(cur);
+          ExpressionMaker  mk;
 
-            if(id == "return")
+          ReturnStatement  ret(mk(cur));
+
+          stmt = Statement(std::move(ret));
+        }
+
+      else
+        if(id == "let")
+        {
+          skip_spaces_and_newline(cur);
+
+            if(!isident0(*cur))
             {
-              ExpressionMaker  mk;
-
-              ReturnStatement  ret(mk(cur));
-
-              stmt = Statement(std::move(ret));
+              throw Error(cur,"let文で識別子が無い");
             }
-        }
 
-      else
-        if(*cur == '}')
-        {
-          break;
-        }
 
-      else
-        {
-          throw Error(cur,"関数本体の途中で不明な文字");
+          id = read_identifier(cur);
+
+          skip_spaces_and_newline(cur);
+
+            if(*cur != '=')
+            {
+              throw Error(cur,"let文で代入記号が無い");
+            }
+
+
+          cur += 1;
+
+
+          ExpressionMaker  mk;
+
+          LetStatement  let(std::move(id),mk(cur));
+
+          stmt = Statement(std::move(let));
         }
+    }
+
+  else
+    {
+      throw Error(cur,"文の途中で不明な文字");
     }
 
 
@@ -80,6 +102,7 @@ read_function_body(Cursor&  cur)
       else
         {
           body.emplace_back(read_statement(cur));
+body.back().print();
         }
     }
 
