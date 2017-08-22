@@ -4,6 +4,7 @@
 
 #include"fung_ValueKind.hpp"
 #include<string>
+#include<vector>
 
 
 namespace fung{
@@ -11,6 +12,10 @@ namespace fung{
 
 
 class Function;
+class Value;
+
+
+using ValueList = std::vector<Value>;
 
 
 struct
@@ -25,6 +30,8 @@ ValueData
   int         integer;
   bool        boolean;
   std::string  string;
+
+  ValueList  list;
 
   Function const*  function;
 
@@ -45,6 +52,7 @@ public:
    explicit Value(int  i);
    explicit Value(bool  b);
    explicit Value(std::string&&  s);
+   explicit Value(ValueList&&  ls);
    explicit Value(Function const*  fn);
    Value(Value const&  rhs) noexcept{*this = rhs;}
    Value(Value&&       rhs) noexcept{*this = std::move(rhs);}

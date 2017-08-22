@@ -109,6 +109,11 @@ read_parameter_list(Cursor&  cur)
       throw Error(cur,"仮引数のリストが閉じられていない");
     }
 
+  else
+    {
+      cur += 1;
+    }
+
 
   return std::move(ls);
 }

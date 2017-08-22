@@ -13,6 +13,7 @@ Value::Value(int  i): kind(ValueKind::integer){data.integer = i;}
 Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
 Value::Value(Function const*  fn): kind(ValueKind::function){data.function = fn;}
 Value::Value(std::string&&  s): kind(ValueKind::string){new(&data) std::string(std::move(s));}
+Value::Value(ValueList&&  ls): kind(ValueKind::list){new(&data) ValueList(std::move(ls));}
 
 
 
@@ -38,6 +39,9 @@ operator=(Value const&  rhs) noexcept
       break;
   case(ValueKind::string):
       new(&data) std::string(rhs.data.string);
+      break;
+  case(ValueKind::list):
+      new(&data) ValueList(rhs.data.list);
       break;
   case(ValueKind::function):
       data.function = rhs.data.function;
@@ -70,6 +74,9 @@ operator=(Value&&  rhs) noexcept
       break;
   case(ValueKind::string):
       new(&data) std::string(std::move(rhs.data.string));
+      break;
+  case(ValueKind::list):
+      new(&data) ValueList(std::move(rhs.data.list));
       break;
   case(ValueKind::function):
       data.function = rhs.data.function;
@@ -129,6 +136,9 @@ clear()
   case(ValueKind::string):
       data.string.~basic_string();
       break;
+  case(ValueKind::list):
+      data.list.~vector();
+      break;
     }
 
 
@@ -156,6 +166,9 @@ to_boolean() const
       break;
   case(ValueKind::string):
       return Value(data.string.size()? true:false);
+      break;
+  case(ValueKind::list):
+      return Value(data.list.size()? true:false);
       break;
     }
 
@@ -187,6 +200,24 @@ print() const
       break;
   case(ValueKind::function):
       data.function->print();
+      break;
+  case(ValueKind::list):
+      {
+        auto   it = data.list.cbegin();
+        auto  end = data.list.cend();
+
+          if(it != end)
+          {
+            it++->print();
+
+              while(it != end)
+              {
+                printf(",");
+
+                it++->print();
+              }
+          }
+      }
       break;
     }
 }

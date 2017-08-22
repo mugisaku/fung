@@ -102,7 +102,6 @@ read_function_body(Cursor&  cur)
       else
         {
           body.emplace_back(read_statement(cur));
-body.back().print();
         }
     }
 

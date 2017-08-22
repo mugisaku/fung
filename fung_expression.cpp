@@ -301,13 +301,15 @@ print_mnemonic(Mnemonic  mn)
   case(Mnemonic::neg): s = "-";break;
   case(Mnemonic::cho): s = "?";break;
   case(Mnemonic::eth): s = ":";break;
-  case(Mnemonic::sus): s = "[]";break;
-  case(Mnemonic::cal): s = "()";break;
+  case(Mnemonic::sus): s = "";break;
+  case(Mnemonic::cal): s = "";break;
     }
 
 
   printf("%s",s);
 }
+
+
 
 
 }

@@ -41,8 +41,7 @@ public:
   std::string const&  get_name() const{return name;}
 
   Value  operator()(Context&  ctx, std::initializer_list<Value>  args={}) const;
-  Value  operator()(Context&  ctx, std::vector<Value> const&  args) const;
-  Value  operator()(Context&  ctx, ExpressionList const&  args) const;
+  Value  operator()(Context&  ctx, ValueList const&  args) const;
 
   ParameterList const&  get_parameter_list() const{return parameter_list;}
 

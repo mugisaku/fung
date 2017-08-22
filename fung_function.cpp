@@ -11,7 +11,7 @@ Value
 Function::
 operator()(Context&  ctx, std::initializer_list<Value>  args) const
 {
-  std::vector<Value>  buf = args;
+  ValueList  buf = args;
 
   return (*this)(ctx,buf);
 }
@@ -19,23 +19,7 @@ operator()(Context&  ctx, std::initializer_list<Value>  args) const
 
 Value
 Function::
-operator()(Context&  ctx, ExpressionList const&  args) const
-{
-  std::vector<Value>  buf;
-
-    for(auto&  expr: args)
-    {
-      buf.emplace_back(expr.evaluate(ctx));
-    }
-
-
-  return (*this)(ctx,buf);
-}
-
-
-Value
-Function::
-operator()(Context&  ctx, std::vector<Value> const&  args) const
+operator()(Context&  ctx, ValueList const&  args) const
 {
     if(parameter_list.size() != args.size())
     {

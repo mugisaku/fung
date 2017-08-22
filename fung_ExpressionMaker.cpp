@@ -80,6 +80,70 @@ read_either_expression(Cursor&  cur)
 }
 
 
+Expression
+read_postfix_expression(Cursor&  cur, Expression&&  expr)
+{
+  skip_spaces_and_newline(cur);
+
+  ExpressionMaker  mk;
+
+    if(*cur == '(')
+    {
+      cur += 1;
+
+      ExpressionList  ls;
+
+      skip_spaces_and_newline(cur);
+
+        if(*cur != ')')
+        {
+          ls.emplace_back(mk(cur));
+
+            while(!mk.get_last_operator().compare(')'))
+            {
+                if(!mk.get_last_operator().compare(','))
+                {
+                  throw Error("式リストがコンマ以外で区切られている %s",mk.get_last_operator().codes);
+                }
+
+
+              ls.emplace_back(mk(cur));
+            }
+        }
+
+
+      auto  l = new Expression(std::move(expr));
+      auto  r = new Expression(std::move(  ls));
+
+      expr = Expression(Mnemonic::cal,l,r);
+
+      return read_postfix_expression(cur,std::move(expr));
+    }
+
+  else
+    if(*cur == '[')
+    {
+      cur += 1;
+
+      auto  l = new Expression(std::move(expr));
+      auto  r = new Expression(        mk(cur));
+
+        if(!mk.get_last_operator().compare(']'))
+        {
+          throw Error("\'[\'が\']\'で閉じていない");
+        }
+
+
+      expr = Expression(Mnemonic::cal,l,r);
+
+      return read_postfix_expression(cur,std::move(expr));
+    }
+
+
+  return std::move(expr);
+}
+
+
 ArgumentList
 read_argument_list(Cursor&  cur)
 {
@@ -148,15 +212,23 @@ process_operator(Cursor&  cur, TinyString const&  o)
     {
       ExpressionMaker  mk;
 
-      push_operand(mk(cur));
+      auto  expr = mk(cur);
+
+        if(!mk.get_last_operator().compare(')'))
+        {
+          throw Error("\'(\'が\')\'で閉じていない");
+        }
+
+
+      expr = read_postfix_expression(cur,std::move(expr));
+
+      push_operand(std::move(expr));
     }
 
   else
     if(o.compare('['))
     {
-      ExpressionMaker  mk;
-
-      push_operand(mk(cur));
+      throw Error("ここに'['は現れないはず");
     }
 
   else
@@ -258,6 +330,8 @@ step_first_phase(Cursor&  cur, Token&&  tok)
     {
       Expression  expr(Value(static_cast<int>(tok->integer)));
 
+      expr = read_postfix_expression(cur,std::move(expr));
+
       push_operand(std::move(expr));
     }
 
@@ -265,6 +339,8 @@ step_first_phase(Cursor&  cur, Token&&  tok)
     if(tok == TokenKind::string)
     {
       Expression  expr(Value(std::move(tok->string)));
+
+      expr = read_postfix_expression(cur,std::move(expr));
 
       push_operand(std::move(expr));
     }
@@ -281,6 +357,8 @@ step_first_phase(Cursor&  cur, Token&&  tok)
           Identifier  id(std::move(s));
 
           Expression  expr(std::move(id));
+
+          expr = read_postfix_expression(cur,std::move(expr));
 
           push_operand(std::move(expr));
         }

@@ -98,19 +98,25 @@ operate(Context&  ctx, bool  b) const
         }
 
 
-        if((*right) != ExpressionKind::list)
+      auto  rv = right->evaluate(ctx);
+
+        if(rv != ValueKind::list)
         {
           throw Error("関数呼び出しの右辺が引数リストではない");
         }
 
 
-      
-
-      return (*lv->function)(ctx,right->data.list);
+      return (*lv->function)(ctx,rv->list);
     }
 
 
   auto  rv = right->evaluate(ctx);
+
+    if(rv == ValueKind::list)
+    {
+      rv = rv->list.back();
+    }
+
 
     switch(mnemonic)
     {
@@ -178,11 +184,33 @@ evaluate(Context&  ctx, bool  b) const
   case(ExpressionKind::identifier):
       return ctx[data.identifier.string];
       break;
+  case(ExpressionKind::list):
+      return Value(to_value_list(data.list,ctx));
+      break;
     }
 
 
   return Value();
 }
+
+
+
+
+ValueList
+to_value_list(ExpressionList const&  ls, Context&  ctx)
+{
+  ValueList  valls;
+
+    for(auto&  expr: ls)
+    {
+      valls.emplace_back(expr.evaluate(ctx));
+    }
+
+
+  return std::move(valls);
+}
+
+
 
 
 }

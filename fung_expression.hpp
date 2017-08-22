@@ -128,6 +128,8 @@ public:
 };
 
 
+ValueList  to_value_list(ExpressionList const&  ls, Context&  ctx);
+
 using ArgumentList = std::vector<Expression>;
 
 ArgumentList  read_argment_list(Cursor&  cur);

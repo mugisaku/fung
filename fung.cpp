@@ -171,11 +171,9 @@ main(int  argc, char**  argv)
             {
               Context  ctx(gsp);
 
-              fn->print();
+              printf("返り値: ");
 
-              printf("\n");
-
-              (*fn)(ctx,{Value(7),Value(32)}).print();
+              (*fn)(ctx).print();
 
               printf("\n");
             }
