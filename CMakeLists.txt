@@ -54,6 +54,8 @@ set(SOURCES
   fung_function.cpp
   fung_parameter.cpp
   fung_value.cpp
+  fung_value__operate.cpp
+  fung_value__convert.cpp
   fung_space.cpp
   fung_context.cpp
   fung_GlobalSpace.cpp

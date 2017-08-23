@@ -28,7 +28,7 @@ operate(Context&  ctx, bool  b) const
 
     if(mnemonic == Mnemonic::cho)
     {
-      auto  b = lv.to_boolean();
+      auto  b = lv.convert_to_boolean();
 
         if(b.is_undefined())
         {
@@ -42,7 +42,7 @@ operate(Context&  ctx, bool  b) const
   else
     if(mnemonic == Mnemonic::log_or)
     {
-      auto  b = lv.to_boolean();
+      auto  b = lv.convert_to_boolean();
 
         if(b.is_undefined())
         {
@@ -58,13 +58,13 @@ operate(Context&  ctx, bool  b) const
 
       auto  rv = right->evaluate(ctx);
 
-      return rv.to_boolean();
+      return rv.convert_to_boolean();
     }
 
   else
     if(mnemonic == Mnemonic::log_and)
     {
-      auto  b = lv.to_boolean();
+      auto  b = lv.convert_to_boolean();
 
         if(b.is_undefined())
         {
@@ -80,14 +80,14 @@ operate(Context&  ctx, bool  b) const
 
       auto  rv = right->evaluate(ctx);
 
-      return rv.to_boolean();
+      return rv.convert_to_boolean();
     }
 
 
 
-       if(mnemonic == Mnemonic::neg    ){return -lv;}
-  else if(mnemonic == Mnemonic::log_not){return !lv;}
-  else if(mnemonic == Mnemonic::bit_not){return ~lv;}
+       if(mnemonic == Mnemonic::neg    ){return Value::neg(    lv);}
+  else if(mnemonic == Mnemonic::log_not){return Value::log_not(lv);}
+  else if(mnemonic == Mnemonic::bit_not){return Value::bit_not(lv);}
 
 
     if(mnemonic == Mnemonic::cal)
@@ -120,9 +120,9 @@ operate(Context&  ctx, bool  b) const
 
     switch(mnemonic)
     {
-  case(Mnemonic::add): return lv+rv;
-  case(Mnemonic::sub): return lv-rv;
-  case(Mnemonic::mul): return lv*rv;
+  case(Mnemonic::add): return Value::add(lv,rv);
+  case(Mnemonic::sub): return Value::sub(lv,rv);
+  case(Mnemonic::mul): return Value::mul(lv,rv);
   case(Mnemonic::div):
         if(!rv)
         {
@@ -130,7 +130,7 @@ operate(Context&  ctx, bool  b) const
         }
 
 
-      return lv/rv;
+      return Value::div(lv,rv);
       break;
   case(Mnemonic::rem):
         if(!rv)
@@ -139,19 +139,19 @@ operate(Context&  ctx, bool  b) const
         }
 
 
-      return lv%rv;
+      return Value::rem(lv,rv);
       break;
-  case(Mnemonic::shl    ): return lv<<rv;
-  case(Mnemonic::shr    ): return lv>>rv;
-  case(Mnemonic::bit_and): return lv&rv;
-  case(Mnemonic::bit_or ): return lv|rv;
-  case(Mnemonic::bit_xor): return lv^rv;
-  case(Mnemonic::eq     ): return lv == rv;
-  case(Mnemonic::neq    ): return lv != rv;
-  case(Mnemonic::lt     ): return lv <  rv;
-  case(Mnemonic::lteq   ): return lv <= rv;
-  case(Mnemonic::gt     ): return lv >  rv;
-  case(Mnemonic::gteq   ): return lv >= rv;
+  case(Mnemonic::shl    ): return Value::shl(    lv,rv);
+  case(Mnemonic::shr    ): return Value::shr(    lv,rv);
+  case(Mnemonic::bit_and): return Value::bit_and(lv,rv);
+  case(Mnemonic::bit_or ): return Value::bit_or( lv,rv);
+  case(Mnemonic::bit_xor): return Value::bit_xor(lv,rv);
+  case(Mnemonic::eq     ): return Value::eq(     lv,rv);
+  case(Mnemonic::neq    ): return Value::neq(    lv,rv);
+  case(Mnemonic::lt     ): return Value::lt(     lv,rv);
+  case(Mnemonic::lteq   ): return Value::lteq(   lv,rv);
+  case(Mnemonic::gt     ): return Value::gt(     lv,rv);
+  case(Mnemonic::gteq   ): return Value::gteq(   lv,rv);
   case(Mnemonic::sus):
       {
       }
@@ -161,7 +161,7 @@ operate(Context&  ctx, bool  b) const
     }
 
 
-  return Value(Undefined());
+  return undefined;
 }
 
 
@@ -190,7 +190,7 @@ evaluate(Context&  ctx, bool  b) const
     }
 
 
-  return Value();
+  return undefined;
 }
 
 

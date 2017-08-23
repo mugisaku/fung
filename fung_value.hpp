@@ -48,7 +48,7 @@ Value
 
 public:
    Value(){}
-   explicit Value(Undefined  ud): kind(ValueKind::undefined){}
+   explicit Value(ValueKind  k): kind(k){}
    explicit Value(int  i);
    explicit Value(bool  b);
    explicit Value(std::string&&  s);
@@ -69,51 +69,46 @@ public:
 
   bool  is_undefined() const{return kind == ValueKind::undefined;}
 
-  static bool  isarith(Value const&  a, Value const&  b){return((a == ValueKind::integer) &&
-                                                                (b == ValueKind::integer));}
-
-  static bool  islog(Value const&  a, Value const&  b){return((a == ValueKind::boolean) &&
-                                                              (b == ValueKind::boolean));}
-
-  int   i() const{return data.integer;}
-
-  Value  operator+ (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()+rhs.i()):Value(Undefined());}
-  Value  operator- (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()-rhs.i()):Value(Undefined());}
-  Value  operator* (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()*rhs.i()):Value(Undefined());}
-  Value  operator/ (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()/rhs.i()):Value(Undefined());}
-  Value  operator% (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()%rhs.i()):Value(Undefined());}
-  Value  operator<<(Value const&  rhs) const{return isarith(*this,rhs)? Value(i()<<rhs.i()):Value(Undefined());}
-  Value  operator>>(Value const&  rhs) const{return isarith(*this,rhs)? Value(i()>>rhs.i()):Value(Undefined());}
-  Value  operator| (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()|rhs.i()):Value(Undefined());}
-  Value  operator& (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()&rhs.i()):Value(Undefined());}
-  Value  operator^ (Value const&  rhs) const{return isarith(*this,rhs)? Value(i()^rhs.i()):Value(Undefined());}
-  Value  operator==(Value const&  rhs) const{return isarith(*this,rhs)? Value(i() == rhs.i()):Value(Undefined());}
-  Value  operator!=(Value const&  rhs) const{return isarith(*this,rhs)? Value(i() != rhs.i()):Value(Undefined());}
-  Value  operator< (Value const&  rhs) const{return isarith(*this,rhs)? Value(i() <  rhs.i()):Value(Undefined());}
-  Value  operator<=(Value const&  rhs) const{return isarith(*this,rhs)? Value(i() <= rhs.i()):Value(Undefined());}
-  Value  operator> (Value const&  rhs) const{return isarith(*this,rhs)? Value(i() >  rhs.i()):Value(Undefined());}
-  Value  operator>=(Value const&  rhs) const{return isarith(*this,rhs)? Value(i() >= rhs.i()):Value(Undefined());}
-
-  Value  operator||(Value const&  rhs) const;
-  Value  operator&&(Value const&  rhs) const;
-
-  Value  operator!() const;
-  Value  operator~() const{return(*this == ValueKind::integer)? Value(~i()):Value(Undefined());}
-  Value  operator-() const{return(*this == ValueKind::integer)? Value(-i()):Value(Undefined());}
-
   operator bool() const{return kind != ValueKind::null;}
 
   void  clear();
 
   ValueKind  get_kind() const{return kind;}
 
-  Value  to_boolean() const;
+  Value  convert_to_boolean() const;
+  Value  convert_to_string() const;
+  Value  convert_to_integer() const;
 
   void  print() const;
+
+  static ValueKind  to_kind(std::string const&  s);
+  static std::string const&  to_string(ValueKind  k);
+
+  static Value  add(    Value const&  lhs, Value const&  rhs);
+  static Value  sub(    Value const&  lhs, Value const&  rhs);
+  static Value  mul(    Value const&  lhs, Value const&  rhs);
+  static Value  div(    Value const&  lhs, Value const&  rhs);
+  static Value  rem(    Value const&  lhs, Value const&  rhs);
+  static Value  shl(    Value const&  lhs, Value const&  rhs);
+  static Value  shr(    Value const&  lhs, Value const&  rhs);
+  static Value  bit_or( Value const&  lhs, Value const&  rhs);
+  static Value  bit_and(Value const&  lhs, Value const&  rhs);
+  static Value  bit_xor(Value const&  lhs, Value const&  rhs);
+  static Value  eq(     Value const&  lhs, Value const&  rhs);
+  static Value  neq(    Value const&  lhs, Value const&  rhs);
+  static Value  lt(     Value const&  lhs, Value const&  rhs);
+  static Value  lteq(   Value const&  lhs, Value const&  rhs);
+  static Value  gt(     Value const&  lhs, Value const&  rhs);
+  static Value  gteq(   Value const&  lhs, Value const&  rhs);
+
+  static Value  log_not(Value const&  lhs);
+  static Value  bit_not(Value const&  lhs);
+  static Value      neg(Value const&  lhs);
 
 };
 
 
+extern Value  const undefined;
 
 
 }

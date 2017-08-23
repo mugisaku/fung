@@ -165,7 +165,7 @@ process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
             }
 
 
-          gsp->append_function(new Function(*gsp,std::move(id),std::move(parals),std::move(return_type),std::move(body)));
+          gsp->append_function(new Function(*gsp,std::move(id),std::move(parals),Value::to_kind(return_type),std::move(body)));
         }
 
       else

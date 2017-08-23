@@ -13,25 +13,12 @@ namespace fung{
 namespace{
 
 
-ValueKind
-to_value_kind(std::string const&  id)
-{
-       if(id == "integer" ){return ValueKind::integer;}
-  else if(id == "boolean" ){return ValueKind::boolean;}
-  else if(id == "string"  ){return ValueKind::string;}
-  else if(id == "function"){return ValueKind::function;}
-
-
-  return ValueKind::undefined;
-}
-
-
 Parameter
 read_parameter(Cursor&  cur)
 {
   auto  type_name = read_identifier(cur);
 
-  auto  vk = to_value_kind(type_name);
+  auto  vk = Value::to_kind(type_name);
 
   skip_spaces_and_newline(cur);
 

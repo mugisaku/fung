@@ -9,6 +9,11 @@ namespace fung{
 
 
 
+Value  const undefined(ValueKind::undefined);
+
+
+
+
 Value::Value(int  i): kind(ValueKind::integer){data.integer = i;}
 Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
 Value::Value(Function const*  fn): kind(ValueKind::function){data.function = fn;}
@@ -88,37 +93,6 @@ operator=(Value&&  rhs) noexcept
 }
 
 
-Value
-Value::
-operator||(Value const&  rhs) const
-{
-  auto  a =     to_boolean();
-  auto  b = rhs.to_boolean();
-
-  return islog(a,b)? Value(a->boolean || b->boolean):Value(Undefined());
-}
-
-
-Value
-Value::operator&&(Value const&  rhs) const
-{
-  auto  a =     to_boolean();
-  auto  b = rhs.to_boolean();
-
-  return islog(a,b)? Value(a->boolean && b->boolean):Value(Undefined());
-}
-
-
-Value
-Value::
-operator!() const
-{
-  auto  a = to_boolean();
-
-  return (a == ValueKind::boolean)? Value(!a->boolean):Value(Undefined());
-}
-
-
 
 
 void
@@ -143,37 +117,6 @@ clear()
 
 
   kind = ValueKind::null;
-}
-
-
-Value
-Value::
-to_boolean() const
-{
-    switch(kind)
-    {
-  case(ValueKind::null):
-  case(ValueKind::function):
-      break;
-  case(ValueKind::undefined):
-      return Value(false);
-      break;
-  case(ValueKind::boolean):
-      return *this;
-      break;
-  case(ValueKind::integer):
-      return Value(data.integer? true:false);
-      break;
-  case(ValueKind::string):
-      return Value(data.string.size()? true:false);
-      break;
-  case(ValueKind::list):
-      return Value(data.list.size()? true:false);
-      break;
-    }
-
-
-  return Value(Undefined());
 }
 
 
@@ -223,6 +166,60 @@ print() const
 }
 
 
+
+
+ValueKind
+Value::
+to_kind(std::string const&  s)
+{
+       if(s == "integer" ){return ValueKind::integer;}
+  else if(s == "boolean" ){return ValueKind::boolean;}
+  else if(s == "string"  ){return ValueKind::string;}
+  else if(s == "function"){return ValueKind::function;}
+  else if(s == "list"    ){return ValueKind::list;}
+
+
+  return ValueKind::undefined;
+}
+
+
+std::string const&
+Value::
+to_string(ValueKind  k)
+{
+  static std::string  const i("integer");
+  static std::string  const s("string");
+  static std::string  const b("boolean");
+  static std::string  const l("list");
+  static std::string  const u("undefined");
+  static std::string  const f("function");
+
+    switch(k)
+    {
+  case(ValueKind::null):
+      break;
+  case(ValueKind::undefined):
+      break;
+  case(ValueKind::boolean):
+      return b;
+      break;
+  case(ValueKind::integer):
+      return i;
+      break;
+  case(ValueKind::function):
+      return f;
+      break;
+  case(ValueKind::string):
+      return s;
+      break;
+  case(ValueKind::list):
+      return l;
+      break;
+    }
+
+
+  return u;
+}
 
 
 }

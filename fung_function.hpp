@@ -25,16 +25,16 @@ Function: public Space
 
   ParameterList  parameter_list;
 
-  std::string  return_type;
+  ValueKind  return_value_kind;
 
   FunctionBody  body;
 
 public:
-  Function(Space&  parent_sp, std::string&&  name_, ParameterList&&  parals, std::string&&  return_type_, FunctionBody&&  body_):
+  Function(Space&  parent_sp, std::string&&  name_, ParameterList&&  parals, ValueKind  retval_k, FunctionBody&&  body_):
   Space(parent_sp),
   name(std::move(name_)),
   parameter_list(std::move(parals)),
-  return_type(std::move(return_type_)),
+  return_value_kind(retval_k),
   body(std::move(body_)){}
 
 

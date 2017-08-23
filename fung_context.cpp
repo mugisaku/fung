@@ -15,6 +15,12 @@ void
 Context::
 enter(Function const&  fn)
 {
+    if(frame_stack.size() > 1000)
+    {
+      throw Error("入れ子が1000を越えた");
+    }
+
+
   frame_stack.emplace_back(fn);
 }
 
@@ -23,6 +29,12 @@ void
 Context::
 leave()
 {
+    if(frame_stack.empty())
+    {
+      throw Error("フレームが無い");
+    }
+
+
   frame_stack.pop_back();
 }
 

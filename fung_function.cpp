@@ -54,6 +54,12 @@ operator()(Context&  ctx, ValueList const&  args) const
 
   ctx.leave();
 
+    if(ctx.get_returned_value().get_kind() != return_value_kind)
+    {
+      throw Error("返り値の型が一致しない");
+    }
+
+
   return ctx.get_returned_value();
 }
 
@@ -80,7 +86,7 @@ print() const
     }
 
 
-  printf(")->%s\n{\n",return_type.data());
+  printf(")->%s\n{\n",Value::to_string(return_value_kind).data());
 
     for(auto&  stmt: body)
     {
