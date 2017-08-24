@@ -165,18 +165,25 @@ main(int  argc, char**  argv)
           gsp->print();
 
 
-          auto  fn = gsp->find_function("main");
+          Context  ctx(gsp);
 
-            if(fn)
+            if(ctx.prepare_to_run("main"))
             {
-              Context  ctx(gsp);
+                if(ctx.run())
+                {
+                  printf("返り値: ");
 
-              printf("返り値: ");
+                  ctx.get_returned_value().print();
+                }
 
-              (*fn)(ctx).print();
-
-              printf("\n");
+              else
+                {
+                  printf("中断しました");
+                }
             }
+
+
+          printf("\n");
         }
     }
 

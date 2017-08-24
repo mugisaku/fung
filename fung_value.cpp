@@ -17,7 +17,7 @@ Value  const undefined(ValueKind::undefined);
 Value::Value(int  i): kind(ValueKind::integer){data.integer = i;}
 Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
 Value::Value(Function const*  fn): kind(ValueKind::function){data.function = fn;}
-Value::Value(std::string&&  s): kind(ValueKind::string){new(&data) std::string(std::move(s));}
+Value::Value(std::string&&  s): kind(ValueKind::string){new(&data) string_type(std::move(s));}
 Value::Value(ValueList&&  ls): kind(ValueKind::list){new(&data) ValueList(std::move(ls));}
 
 
@@ -43,7 +43,7 @@ operator=(Value const&  rhs) noexcept
       data.integer = rhs.data.integer;
       break;
   case(ValueKind::string):
-      new(&data) std::string(rhs.data.string);
+      new(&data) string_type(rhs.data.string);
       break;
   case(ValueKind::list):
       new(&data) ValueList(rhs.data.list);
@@ -78,7 +78,7 @@ operator=(Value&&  rhs) noexcept
       data.integer = rhs.data.integer;
       break;
   case(ValueKind::string):
-      new(&data) std::string(std::move(rhs.data.string));
+      new(&data) string_type(std::move(rhs.data.string));
       break;
   case(ValueKind::list):
       new(&data) ValueList(std::move(rhs.data.list));
@@ -108,7 +108,7 @@ clear()
   case(ValueKind::function):
       break;
   case(ValueKind::string):
-      data.string.~basic_string();
+      data.string.~string_type();
       break;
   case(ValueKind::list):
       data.list.~vector();

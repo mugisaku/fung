@@ -11,6 +11,61 @@ namespace fung{
 
 
 
+bool
+Context::
+prepare_to_run(std::string const&  function_name)
+{
+  frame_stack.clear();
+
+  auto  fn = global_space->find_function(function_name);
+
+    if(fn)
+    {
+      returned_value = undefined;
+
+      enter(*fn);
+
+      return true;
+    }
+
+
+  return false;
+}
+
+
+bool
+Context::
+run()
+{
+  interruption_flag = false;
+
+    while(frame_stack.size())
+    {
+      auto&  frame = frame_stack.back();
+
+      auto  stmt = frame.get_next_statement();
+
+        if(stmt)
+        {
+          stmt->execute(*this);
+
+            if(interruption_flag)
+            {
+              return false;
+            }
+        }
+
+      else
+        {
+          frame_stack.pop_back();
+        }
+    }
+
+
+  return true;
+}
+
+
 void
 Context::
 enter(Function const&  fn)
@@ -43,7 +98,7 @@ void
 Context::
 entry(std::string const&  name, Expression const&  expr)
 {
-  frame_stack.back().append(Variable(name,expr.evaluate(*this)));
+  frame_stack.back().append_variable(Variable(name,expr.evaluate(*this)));
 }
 
 
@@ -51,7 +106,7 @@ void
 Context::
 entry(std::string const&  name, Value const&  val)
 {
-  frame_stack.back().append(Variable(name,val));
+  frame_stack.back().append_variable(Variable(name,val));
 }
 
 
@@ -59,12 +114,11 @@ Value
 Context::
 find_value(std::string const&  name) const
 {
-    for(auto&  var: frame_stack.back().variable_list)
+  auto  var = frame_stack.back().find_variable(name);
+
+    if(var)
     {
-        if(var.name == name)
-        {
-          return var.value;
-        }
+      return var->value;
     }
 
 
@@ -86,12 +140,11 @@ operator[](std::string const&  name) const
 
   auto&  f = frame_stack.back();
 
-    for(auto&  var: f.variable_list)
+  auto  var = f.find_variable(name);
+
+    if(var)
     {
-        if(var.name == name)
-        {
-          return var.value;
-        }
+      return var->value;
     }
 
 
@@ -106,7 +159,7 @@ operator[](std::string const&  name) const
     }
 
 
-  throw Error("関数%sで %s がみつからない",f.function.get_name().data(),name.data());
+  throw Error("関数%sで %s がみつからない",f.get_function().get_name().data(),name.data());
 }
 
 

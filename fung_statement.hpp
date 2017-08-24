@@ -19,6 +19,7 @@ StatementKind
 {
   null,
 
+  interrupt,
   let,
   return_,
 
@@ -47,6 +48,9 @@ ReturnStatement
 };
 
 
+struct InterruptStatement{};
+
+
 class
 Statement
 {
@@ -57,6 +61,7 @@ Statement
 
 public:
   Statement(){}
+  Statement(InterruptStatement  intstmt);
   Statement(LetStatement&&  bin);
   Statement(ReturnStatement&&  ret);
   Statement(Statement const&  rhs) noexcept{*this = rhs;}
@@ -67,6 +72,8 @@ public:
   Statement&  operator=(Statement&&       rhs) noexcept;
 
   Expression const*  operator->() const{return &expression;}
+
+  operator bool() const{return kind != StatementKind::null;}
 
   bool  operator==(StatementKind  k) const{return kind == k;}
 

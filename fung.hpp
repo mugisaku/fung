@@ -6,6 +6,7 @@
 #include"fung_token.hpp"
 #include"fung_GlobalSpace.hpp"
 #include"fung_function.hpp"
+#include"fung_context.hpp"
 
 
 namespace fung{

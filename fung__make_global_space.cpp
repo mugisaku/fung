@@ -34,6 +34,12 @@ read_statement(Cursor&  cur)
         }
 
       else
+        if(id == "interrupt")
+        {
+          stmt = Statement(InterruptStatement());
+        }
+
+      else
         if(id == "let")
         {
           skip_spaces_and_newline(cur);
@@ -63,6 +69,12 @@ read_statement(Cursor&  cur)
 
           stmt = Statement(std::move(let));
         }
+    }
+
+  else
+    if(*cur == ';')
+    {
+      cur += 1;
     }
 
   else
@@ -101,7 +113,12 @@ read_function_body(Cursor&  cur)
 
       else
         {
-          body.emplace_back(read_statement(cur));
+          auto  stmt = read_statement(cur);
+
+            if(stmt)
+            {
+              body.emplace_back(std::move(stmt));
+            }
         }
     }
 

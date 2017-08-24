@@ -6,12 +6,14 @@
 #include"fung_expression.hpp"
 #include"fung_parameter.hpp"
 #include"fung_space.hpp"
-#include"fung_context.hpp"
 #include<string>
 #include<initializer_list>
 
 
 namespace fung{
+
+
+class Context;
 
 
 using FunctionBody = std::vector<Statement>;
@@ -44,6 +46,8 @@ public:
   Value  operator()(Context&  ctx, ValueList const&  args) const;
 
   ParameterList const&  get_parameter_list() const{return parameter_list;}
+
+  FunctionBody const&  get_body() const{return body;}
 
   void  print() const;
 

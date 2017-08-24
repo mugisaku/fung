@@ -1,5 +1,6 @@
 #include"fung_statement.hpp"
 #include"fung_function.hpp"
+#include"fung_context.hpp"
 
 
 
@@ -7,6 +8,13 @@
 namespace fung{
 
 
+
+
+Statement::
+Statement(InterruptStatement  intstmt):
+kind(StatementKind::interrupt)
+{
+}
 
 
 Statement::
@@ -66,6 +74,8 @@ clear()
     {
   case(StatementKind::null):
       break;
+  case(StatementKind::interrupt):
+      break;
   case(StatementKind::let):
       break;
   case(StatementKind::return_):
@@ -86,6 +96,9 @@ execute(Context&  ctx) const
     switch(kind)
     {
   case(StatementKind::null):
+      break;
+  case(StatementKind::interrupt):
+      ctx.set_interruption_flag();
       break;
   case(StatementKind::let):
       ctx.entry(identifier,expression);
@@ -112,6 +125,9 @@ print() const
     {
   case(StatementKind::null):
       printf("NULL_STMT ");
+      break;
+  case(StatementKind::interrupt):
+      printf("interrupt");
       break;
   case(StatementKind::let):
       printf("let  %s = ",identifier.data());

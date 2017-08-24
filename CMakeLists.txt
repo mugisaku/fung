@@ -59,6 +59,7 @@ set(SOURCES
   fung_space.cpp
   fung_context.cpp
   fung_GlobalSpace.cpp
+  fung_ExecutionFrame.cpp
   fung_cursor.cpp
   fung__skip.cpp
   fung_unicode.cpp
