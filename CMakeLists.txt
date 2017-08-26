@@ -46,7 +46,6 @@ endif()
 
 
 set(SOURCES
-  fung.cpp
   fung_expression.cpp
   fung_expression__evaluate.cpp
   fung_ExpressionMaker.cpp
@@ -72,7 +71,8 @@ set(SOURCES
 
 include_directories(.)
 include_directories(./preprocessing)
-add_executable("fung${EXTENSION}" ${SOURCES} ${EXPREE_SOURCES})
+add_executable("fung${EXTENSION}" ${SOURCES} fung.cpp)
+add_executable("testString${EXTENSION}" ${SOURCES} testString.cpp)
 
 
 

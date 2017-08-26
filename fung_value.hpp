@@ -3,16 +3,12 @@
 
 
 #include"fung_ValueKind.hpp"
-//#include"fung_SharedString.hpp"
 #include<string>
 #include<vector>
 
 
 namespace fung{
 
-
-
-using string_type = std::string;
 
 
 class Function;
@@ -27,7 +23,7 @@ ValueData
 {
   int          integer;
   bool         boolean;
-  string_type   string;
+  std::string   string;
 
   ValueList  list;
 
