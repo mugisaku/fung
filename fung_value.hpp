@@ -26,6 +26,8 @@ ValueData
   bool                boolean;
   SharedString<char>   string;
 
+  Value*  value;
+
   ValueList  list;
 
   Function const*  function;
@@ -48,6 +50,7 @@ public:
    explicit Value(bool  b);
    explicit Value(std::string&&  s);
    explicit Value(SharedString<char>&&  s);
+   explicit Value(Value*  v);
    explicit Value(ValueList&&  ls);
    explicit Value(Function const*  fn);
    Value(Value const&  rhs) noexcept{*this = rhs;}
@@ -74,6 +77,8 @@ public:
   Value  convert_to_boolean() const;
   Value  convert_to_string() const;
   Value  convert_to_integer() const;
+
+  Value  get_property(std::string const&  name) const;
 
   void  print() const;
 

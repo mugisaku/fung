@@ -22,6 +22,7 @@ ValueKind
   function,
   string,
   list,
+  any,
 
   nullpointer,
   pointer,

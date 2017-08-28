@@ -19,6 +19,7 @@ Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
 Value::Value(Function const*  fn): kind(ValueKind::function){data.function = fn;}
 Value::Value(std::string&&  s): kind(ValueKind::string){new(&data) SharedString<char>(std::move(s));}
 Value::Value(SharedString<char>&&  s): kind(ValueKind::string){new(&data) SharedString<char>(std::move(s));}
+Value::Value(Value*  v): kind(ValueKind::any){data.value = v;}
 Value::Value(ValueList&&  ls): kind(ValueKind::list){new(&data) ValueList(std::move(ls));}
 
 
@@ -45,6 +46,9 @@ operator=(Value const&  rhs) noexcept
       break;
   case(ValueKind::string):
       new(&data) SharedString<char>(rhs.data.string);
+      break;
+  case(ValueKind::any):
+      data.value = new Value(*rhs.data.value);
       break;
   case(ValueKind::list):
       new(&data) ValueList(rhs.data.list);
@@ -81,6 +85,9 @@ operator=(Value&&  rhs) noexcept
   case(ValueKind::string):
       new(&data) SharedString<char>(std::move(rhs.data.string));
       break;
+  case(ValueKind::any):
+      data.value = rhs.data.value;
+      break;
   case(ValueKind::list):
       new(&data) ValueList(std::move(rhs.data.list));
       break;
@@ -110,6 +117,9 @@ clear()
       break;
   case(ValueKind::string):
       data.string.~SharedString();
+      break;
+  case(ValueKind::any):
+      delete data.value;
       break;
   case(ValueKind::list):
       data.list.~vector();
@@ -145,6 +155,9 @@ print() const
   case(ValueKind::function):
       data.function->print();
       break;
+  case(ValueKind::any):
+      data.value->print();
+      break;
   case(ValueKind::list):
       {
         auto   it = data.list.cbegin();
@@ -178,6 +191,7 @@ to_kind(std::string const&  s)
   else if(s == "string"  ){return ValueKind::string;}
   else if(s == "function"){return ValueKind::function;}
   else if(s == "list"    ){return ValueKind::list;}
+  else if(s == "any"     ){return ValueKind::any;}
 
 
   return ValueKind::undefined;
@@ -192,6 +206,7 @@ to_string(ValueKind  k)
   static std::string  const s("string");
   static std::string  const b("boolean");
   static std::string  const l("list");
+  static std::string  const a("any");
   static std::string  const u("undefined");
   static std::string  const f("function");
 
@@ -215,6 +230,9 @@ to_string(ValueKind  k)
       break;
   case(ValueKind::list):
       return l;
+      break;
+  case(ValueKind::any):
+      return a;
       break;
     }
 

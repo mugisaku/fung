@@ -158,6 +158,7 @@ is_unary_operator() const
   auto&  mn = data.mnemonic;
 
   return((mn == Mnemonic::neg    ) ||
+         (mn == Mnemonic::der    ) ||
          (mn == Mnemonic::bit_not) ||
          (mn == Mnemonic::log_not));
 }
@@ -189,6 +190,8 @@ is_binary_operator() const
          (mn == Mnemonic::gteq   ) ||
          (mn == Mnemonic::cho    ) ||
          (mn == Mnemonic::eth    ) ||
+         (mn == Mnemonic::acc    ) ||
+         (mn == Mnemonic::ina    ) ||
          (mn == Mnemonic::sus    ) ||
          (mn == Mnemonic::cal    ));
 }
@@ -303,6 +306,9 @@ print_mnemonic(Mnemonic  mn)
   case(Mnemonic::eth): s = ":";break;
   case(Mnemonic::sus): s = "";break;
   case(Mnemonic::cal): s = "";break;
+  case(Mnemonic::acc): s = ".";break;
+  case(Mnemonic::der): s = "*";break;
+  case(Mnemonic::ina): s = "->";break;
     }
 
 

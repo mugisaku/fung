@@ -45,6 +45,9 @@ Mnemonic
   eth,
   sus,
   cal,
+  acc,
+  ina,
+  der,
 
 };
 
@@ -114,6 +117,8 @@ public:
   ExpressionData const*  operator->() const{return &data;}
 
   void  clear();
+
+  ExpressionKind  get_kind() const{return kind;}
 
   bool   is_unary_operator() const;
   bool  is_binary_operator() const;

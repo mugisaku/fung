@@ -24,6 +24,9 @@ precedence(Mnemonic  mn)
 
     switch(mn)
     {
+  case(Mnemonic::acc): p -= 4;break;
+  case(Mnemonic::der): p -= 4;break;
+
   case(Mnemonic::add    ): p -= 6;break;
   case(Mnemonic::sub    ): p -= 6;break;
   case(Mnemonic::mul    ): p -= 5;break;
@@ -190,6 +193,7 @@ push_operand(Expression&&  expr)
 
       Expression  t(c == '-'? Mnemonic::neg    :
                     c == '~'? Mnemonic::bit_not:
+                    c == '*'? Mnemonic::der:
                     c == '!'? Mnemonic::log_not:Mnemonic::nop,new Expression(std::move(expr)));
 
       expr = std::move(t);
@@ -238,8 +242,6 @@ process_operator(Cursor&  cur, TinyString const&  o)
        o.compare(']') ||
        o.compare(':'))
     {
-      last_operator = o;
-
       need_to_close = true;
     }
 
@@ -295,6 +297,8 @@ process_operator(Cursor&  cur, TinyString const&  o)
       else if(o.compare('>','>')){mn = Mnemonic::shr;}
       else if(o.compare('>','=')){mn = Mnemonic::gteq;}
       else if(o.compare('>'    )){mn = Mnemonic::gt;}
+      else if(o.compare('-','>')){mn = Mnemonic::ina;}
+      else if(o.compare('.'    )){mn = Mnemonic::acc;}
       else
         {
           throw Error(cur,"使えない二項演算子 %s",o.codes);

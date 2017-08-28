@@ -110,6 +110,18 @@ operate(Context&  ctx, bool  b) const
     }
 
 
+    if(mnemonic == Mnemonic::acc)
+    {
+        if(right->get_kind() != ExpressionKind::identifier)
+        {
+          throw Error("メンバー呼び出しの右辺が識別子ではない");
+        }
+
+
+      return lv.get_property((*right)->identifier.string);
+    }
+
+
   auto  rv = right->evaluate(ctx);
 
     if(rv == ValueKind::list)

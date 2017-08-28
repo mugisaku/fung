@@ -44,7 +44,7 @@ SharedString
       ++reference_count;
     }
 
-    bool  unrefer()
+    size_t  unrefer()
     {
       return --reference_count;
     }
@@ -193,7 +193,7 @@ public:
 
             delete var.string;
 
-            printf("%zd was deleted\n",id);
+//            printf("%zd was deleted\n",id);
           }
       }
 
