@@ -3,8 +3,9 @@
 
 
 #include"fung_ValueKind.hpp"
-#include<string>
+#include"fung_SharedString.hpp"
 #include<vector>
+#include<string>
 
 
 namespace fung{
@@ -21,9 +22,9 @@ using ValueList = std::vector<Value>;
 union
 ValueData
 {
-  int          integer;
-  bool         boolean;
-  std::string   string;
+  int                 integer;
+  bool                boolean;
+  SharedString<char>   string;
 
   ValueList  list;
 
@@ -46,6 +47,7 @@ public:
    explicit Value(int  i);
    explicit Value(bool  b);
    explicit Value(std::string&&  s);
+   explicit Value(SharedString<char>&&  s);
    explicit Value(ValueList&&  ls);
    explicit Value(Function const*  fn);
    Value(Value const&  rhs) noexcept{*this = rhs;}

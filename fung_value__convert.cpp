@@ -28,7 +28,7 @@ convert_to_boolean() const
       return Value(data.integer? true:false);
       break;
   case(ValueKind::string):
-      return Value(data.string.size()? true:false);
+      return Value(data.string.length()? true:false);
       break;
   case(ValueKind::list):
       return Value(data.list.size()? true:false);
@@ -83,7 +83,7 @@ convert_to_integer() const
       return *this;
       break;
   case(ValueKind::string):
-      return Value(std::stoi(data.string));
+      return Value(std::stoi(*data.string));
       break;
     }
 

@@ -24,7 +24,6 @@ TokenKind
   null,
 
   integer,
-  real,
   string,
   identifier,
   operator_,
@@ -59,7 +58,6 @@ union
 TokenData
 {
   unsigned int     integer;
-  double              real;
   std::string       string;
   TinyString   tiny_string;
 
@@ -79,7 +77,6 @@ Token
 public:
   Token(){}
   Token(unsigned int       i, TokenInfo&&  info_=TokenInfo());
-  Token(double             f, TokenInfo&&  info_=TokenInfo());
   Token(std::string&&      s, TokenInfo&&  info_=TokenInfo());
   Token(Identifier&&      id, TokenInfo&&  info_=TokenInfo());
   Token(TinyString const&  o, TokenInfo&&  info_=TokenInfo());

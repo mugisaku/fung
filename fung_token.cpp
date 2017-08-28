@@ -11,7 +11,6 @@ namespace fung{
 
 
 Token::Token(unsigned int       i, TokenInfo&&  info_): kind(TokenKind::integer   ), info(std::move(info_)){data.integer = i;}
-Token::Token(double             f, TokenInfo&&  info_): kind(TokenKind::real      ), info(std::move(info_)){data.real    = f;}
 Token::Token(std::string&&      s, TokenInfo&&  info_): kind(TokenKind::string    ), info(std::move(info_)){new(&data) std::string(std::move(s));}
 Token::Token(Identifier&&      id, TokenInfo&&  info_): kind(TokenKind::identifier), info(std::move(info_)){new(&data) std::string(std::move(id.string));}
 Token::Token(TinyString const&  o, TokenInfo&&  info_): kind(TokenKind::operator_ ), info(std::move(info_)){data.tiny_string = o;}
@@ -31,9 +30,6 @@ operator=(Token&&  rhs) noexcept
       break;
   case(TokenKind::integer):
       data.integer = rhs.data.integer;
-      break;
-  case(TokenKind::real):
-      data.real = rhs.data.real;
       break;
   case(TokenKind::identifier):
   case(TokenKind::string):
@@ -59,7 +55,6 @@ clear()
     {
   case(TokenKind::null):
   case(TokenKind::integer):
-  case(TokenKind::real):
   case(TokenKind::operator_):
       break;
   case(TokenKind::identifier):
@@ -84,9 +79,6 @@ print(FILE*  out) const
       break;
   case(TokenKind::integer):
       fprintf(out,"%ud",data.integer);
-      break;
-  case(TokenKind::real):
-      fprintf(out,"%f",data.real);
       break;
   case(TokenKind::identifier):
       fprintf(out,"%s",data.string.data());
