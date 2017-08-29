@@ -122,7 +122,7 @@ clear()
       delete data.value;
       break;
   case(ValueKind::list):
-      data.list.~vector();
+      data.list.~SharedString();
       break;
     }
 

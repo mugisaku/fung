@@ -21,7 +21,7 @@ GlobalSpace: public Space
   std::vector<std::unique_ptr<Function>>  function_list;
 
 public:
-  GlobalSpace(): Space(*this){}
+  GlobalSpace();
 
   Function const&  append_function(Function*  fn);
 

@@ -34,7 +34,9 @@ Value::
 add(Value const&  lhs, Value const&  rhs)
 {
   return (lhs == ValueKind::integer)? add_i(lhs,rhs):
-         (lhs == ValueKind::string )? add_s(lhs,rhs):undefined;
+         (lhs == ValueKind::string )? add_s(lhs,rhs):
+         (lhs == ValueKind::list   )? Value(lhs->list+rhs):
+           undefined;
 }
 
 

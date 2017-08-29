@@ -30,7 +30,7 @@ get_property(std::string const&  name) const
         if(name == "length"){return Value(static_cast<int>(data.string.length()));}
       break;
   case(ValueKind::list):
-        if(name == "length"){return Value(static_cast<int>(data.list.size()));}
+        if(name == "length"){return Value(static_cast<int>(data.list.length()));}
       break;
   case(ValueKind::any):
       break;

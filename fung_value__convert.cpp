@@ -31,7 +31,7 @@ convert_to_boolean() const
       return Value(data.string.length()? true:false);
       break;
   case(ValueKind::list):
-      return Value(data.list.size()? true:false);
+      return Value(data.list.length()? true:false);
       break;
     }
 

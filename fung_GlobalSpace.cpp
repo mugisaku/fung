@@ -9,6 +9,14 @@ namespace fung{
 
 
 
+GlobalSpace::
+GlobalSpace(): Space(*this)
+{
+}
+
+
+
+
 Function const&
 GlobalSpace::
 append_function(Function*  fn)

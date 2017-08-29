@@ -22,7 +22,7 @@ Value
 Function::
 operator()(Context&  ctx, ValueList const&  args) const
 {
-    if(parameter_list.size() != args.size())
+    if(parameter_list.size() != args.length())
     {
       throw Error("引数の数が一致しない");
     }
@@ -30,7 +30,7 @@ operator()(Context&  ctx, ValueList const&  args) const
 
   ctx.enter(*this);
 
-  auto  it = args.begin();
+  auto  it = args.cbegin();
 
     for(auto&  para: parameter_list)
     {

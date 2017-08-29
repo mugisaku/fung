@@ -209,17 +209,16 @@ evaluate(Context&  ctx, bool  b) const
 
 
 ValueList
+read_list(ValueList  ls, ExpressionList::const_iterator  it, ExpressionList::const_iterator  end, Context&  ctx)
+{
+  return(it != end)? read_list(ls+it->evaluate(ctx),it+1,end,ctx):std::move(ls);
+}
+
+
+ValueList
 to_value_list(ExpressionList const&  ls, Context&  ctx)
 {
-  ValueList  valls;
-
-    for(auto&  expr: ls)
-    {
-      valls.emplace_back(expr.evaluate(ctx));
-    }
-
-
-  return std::move(valls);
+  return read_list(ValueList(),ls.cbegin(),ls.cend(),ctx);
 }
 
 

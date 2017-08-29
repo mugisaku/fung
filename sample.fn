@@ -1,0 +1,19 @@
+
+
+
+function
+f(list  ls, integer  n)->list
+{
+  return n? f(ls+n,n-1):ls;
+}
+
+
+function
+main()->list
+{
+  return f(list(),8);
+}
+
+
+
+

@@ -356,6 +356,25 @@ step_first_phase(Cursor&  cur, Token&&  tok)
 
            if(s == "true" ){push_operand(Expression(Value( true)));}
       else if(s == "false"){push_operand(Expression(Value(false)));}
+      else if(s == "list")
+        {
+          skip_spaces_and_newline(cur);
+
+            if(*cur != '(')
+            {
+              throw Error(cur,"リストの中身が無い");
+            }
+
+
+          cur += 1;
+
+          auto  expr = Expression(read_argument_list(cur));
+
+          expr = read_postfix_expression(cur,std::move(expr));
+
+          push_operand(std::move(expr));
+        }
+
       else
         {
           Identifier  id(std::move(s));
@@ -403,6 +422,7 @@ ExpressionMaker::
 step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
 {
     if((e == ExpressionKind::value     ) ||
+       (e == ExpressionKind::list      ) ||
        (e == ExpressionKind::operation ) ||
        (e == ExpressionKind::identifier))
     {

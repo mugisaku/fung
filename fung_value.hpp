@@ -16,7 +16,7 @@ class Function;
 class Value;
 
 
-using ValueList = std::vector<Value>;
+using ValueList = SharedString<Value>;
 
 
 union

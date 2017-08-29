@@ -76,7 +76,7 @@ ExpressionData
   Value            value;
   Identifier  identifier;
 
-  std::vector<Expression>  list;
+  ExpressionList  list;
 
   ExpressionData(){}
  ~ExpressionData(){}
