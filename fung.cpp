@@ -159,11 +159,28 @@ main(int  argc, char**  argv)
     try
     {
       gsp = make_global_space(cur);
+    }
 
+
+    catch(Error&  e)
+    {
+      printf("ERROR\n");
+
+      e.cursor.print();
+
+      printf("\n%s\n",e.what());
+
+      printf("グローバル空間の生成に失敗\n");
+ 
+      exit(-1);
+    }
+
+
+    try
+    {
         if(gsp)
         {
           gsp->print();
-
 
           Context  ctx(gsp);
 
@@ -195,6 +212,8 @@ main(int  argc, char**  argv)
       e.cursor.print();
 
       printf("\n%s\n",e.what());
+
+      printf("実行に失敗\n");
     }
 
 

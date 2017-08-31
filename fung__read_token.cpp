@@ -328,26 +328,51 @@ read_string_literal(Cursor&  cur)
 unsigned int
 read_character_literal(Cursor&  cur)
 {
-    if(*cur == '\\')
+  unsigned int  c = *cur;
+
+  cur += 1;
+
+    if(c == '\'')
     {
-/*
-          switch(*++p)
+      throw Error("文字リテラルの中身が無い");
+    }
+
+  else
+    if(c == '\\')
+    {
+      auto  second_c = *cur;
+
+      cur += 1;
+
+          switch(second_c)
           {
-        case('0'):  return '\0';
-        case('t'):  return '\t';
-        case('r'):  return '\r';
-        case('n'):  return '\n';
-        case('\\'): return '\\';
-        case('\''): return '\'';
-        case('\"'): return '\"';
-        case('x'): return read_hexadecimal(p+1);
-        default: throw Error("処理不可なエスケープ文字 %c",*p);
+        case('0'):  c = '\0';break;
+        case('t'):  c = '\t';break;
+        case('r'):  c = '\r';break;
+        case('n'):  c = '\n';break;
+        case('\\'): c = '\\';break;
+        case('\''): c = '\'';break;
+        case('\"'): c = '\"';break;
+        default: throw Error("処理不可なエスケープ文字 %c",second_c);
           }
-*/
+    }
+
+  else
+    if(iscntrl(c))
+    {
+      throw Error("文字リテラルに制御文字 %2d",c);
     }
 
 
-  return 0;
+    if(*cur != '\'')
+    {
+      throw Error("文字リテラルが \' で閉じられていないか、余分な記述がある");
+    }
+
+
+  cur += 1;
+
+  return c;
 }
 
 

@@ -10,16 +10,78 @@ list  ls("first",number,age)
 
 
 function
-f(list  ls, integer  n)->list
+isbdigit(integer  c)->boolean
 {
-  return n? f(ls+s,n-1):ls;
+  return((c == '0') ||
+         (c == '1'));
+}
+
+
+function
+isodigit(integer  c)->boolean
+{
+  return((c >= '0') &&
+         (c <= '7'));
+}
+
+
+function
+isdigit(integer  c)->boolean
+{
+  return((c >= '0') &&
+         (c <= '9'));
+}
+
+
+function
+isxdigit(integer  c)->boolean
+{
+  return((              isdigit(c)) ||
+         ((c >= 'a') && (c <= 'f')) ||
+         ((c >= 'A') && (c <= 'F')));
+}
+
+
+function
+isalpha(integer  c)->boolean
+{
+  return(((c >= 'a') && (c <= 'z')) ||
+         ((c >= 'A') && (c <= 'Z')));
+}
+
+
+function
+isalnum(integer  c)->boolean
+{
+  return(isdigit(c) || isalpha(c));
+}
+
+
+function
+isident0(integer  c)->boolean
+{
+  return(isalpha(c) || (c == '_'));
+}
+
+
+function
+isidentn(integer  c)->boolean
+{
+  return(isalnum(c) || (c == '_'));
+}
+
+
+function
+read_identifier(list  ls)->list
+{
+  return list();
 }
 
 
 function
 main()->list
 {
-  return f(ls,8);
+  return list(isident0('_'));
 }
 
 

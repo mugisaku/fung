@@ -3,6 +3,7 @@
 
 
 #include<cstdint>
+#include<cstdio>
 #include<algorithm>
 #include<initializer_list>
 
@@ -15,29 +16,36 @@ template<typename  T>
 class
 BasicString
 {
-  static size_t  length(T const*  s)
-  {
-    size_t  n = 0;
-
-      while(*s)
-      {
-        ++n;
-        ++s;
-      }
-
-
-    return n;
-  }
-
-
   struct{
     T*  pointer=nullptr;
 
-    size_t            length=0;
+    size_t    length=0;
+    size_t  capacity=0;
 
     size_t  reference_count=0;
 
   } var;
+
+
+  void  extend(size_t  new_capacity)
+  {
+    auto  new_data = new T[new_capacity+1];
+
+    auto  dst = new_data;
+
+    auto  src = var.pointer           ;
+                var.pointer = new_data;
+
+    auto  n = length();
+
+      while(n--)
+      {
+        *dst++ = std::move(*src++);
+      }
+
+
+    var.capacity = new_capacity;
+  }
 
 public:
   BasicString(){}
@@ -55,6 +63,7 @@ public:
     var.pointer = new T[rhs.length()+1];
 
     var.length          = rhs.length();
+    var.capacity        = rhs.length();
     var.reference_count = rhs.reference_count();
 
     auto  dst =     data();
@@ -79,6 +88,7 @@ public:
                   rhs.var.pointer = nullptr;
 
     var.length          = rhs.length();
+    var.capacity        = rhs.capacity();
     var.reference_count = rhs.reference_count();
 
     return *this;
@@ -140,14 +150,16 @@ public:
     delete[] var.pointer          ;
              var.pointer = nullptr;
 
-    var.length = 0;
+    var.length          = 0;
+    var.capacity        = 0;
     var.reference_count = 0;
   }
 
+  T      *  data()      {return var.pointer;}
   T const*  data() const{return var.pointer;}
 
-  T const*  begin() const{return var.pointer           ;}
-  T const*    end() const{return var.pointer+var.length;}
+  T*  begin() const{return var.pointer           ;}
+  T*    end() const{return var.pointer+var.length;}
 
   T const*  cbegin() const{return var.pointer           ;}
   T const*    cend() const{return var.pointer+var.length;}
@@ -158,8 +170,8 @@ public:
   T const&  operator[](size_t  i) const{return var.pointer[i];}
   T const&  at(size_t  i) const{return var.pointer[i];}
 
-  size_t  length() const{return var.length;}
-//  size_t  capacity() const{return var.allocated_length-1;}
+  size_t    length() const{return var.length;}
+  size_t  capacity() const{return var.capacity;}
 
   void  assign(BasicString const&  rhs)
   {
@@ -200,31 +212,22 @@ public:
 
   void  append(T const*  buf, size_t  len)
   {
-    auto  old_len = length();
+    auto  new_length = (length()+len);
 
-    var.length = old_len+len;
-
-
-    auto  new_data = new T[var.length+1];
-
-    auto  dst = new_data;
-
-    auto  src = var.pointer           ;
-                var.pointer = new_data;
-
-      while(old_len--)
+      if(new_length > capacity())
       {
-        *dst++ = std::move(*src++);
+        extend(new_length*2);
       }
 
+
+    auto  dst = end();
+
+    var.length += len;
 
       while(len--)
       {
-        *dst++ = std::move(*buf++);
+        *dst++ = *buf++;
       }
-
-
-    *dst = T();
   }
 
   void  refer()
@@ -246,6 +249,23 @@ public:
   {
     return var.reference_count;
   }
+
+
+  static size_t  length(T const*  s)
+  {
+    size_t  n = 0;
+
+      while(*s)
+      {
+        ++n;
+        ++s;
+      }
+
+
+    return n;
+  }
+
+
 
 };
 

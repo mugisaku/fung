@@ -116,7 +116,7 @@ read_expression_list(Cursor&  cur)
     {
       ExpressionMaker  mk;
 
-      auto  expr = mk(cur);
+      auto  expr = mk(cur,"式リスト");
 
         if(expr)
         {

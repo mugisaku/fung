@@ -70,7 +70,7 @@ read_either_expression(Cursor&  cur)
 {
   ExpressionMaker  mk;
 
-  auto  l = new Expression(mk(cur));
+  auto  l = new Expression(mk(cur,"条件演算の第一式"));
 
     if(!mk.get_last_operator().compare(':'))
     {
@@ -78,7 +78,7 @@ read_either_expression(Cursor&  cur)
     }
 
 
-  auto  r = new Expression(mk(cur));
+  auto  r = new Expression(mk(cur,"条件演算の第二式"));
 
   return Expression(Mnemonic::eth,l,r);
 }
@@ -187,7 +187,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
     {
       ExpressionMaker  mk;
 
-      auto  expr = mk(cur);
+      auto  expr = mk(cur,"式リスト");
 
         if(!mk.get_last_operator().compare(')'))
         {
@@ -251,6 +251,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
       Mnemonic  mn;
 
            if(o.compare('+'    )){mn = Mnemonic::add;}
+      else if(o.compare('-','>')){mn = Mnemonic::ina;}
       else if(o.compare('-'    )){mn = Mnemonic::sub;}
       else if(o.compare('*'    )){mn = Mnemonic::mul;}
       else if(o.compare('/'    )){mn = Mnemonic::div;}
@@ -268,7 +269,6 @@ process_operator(Cursor&  cur, TinyString const&  o)
       else if(o.compare('>','>')){mn = Mnemonic::shr;}
       else if(o.compare('>','=')){mn = Mnemonic::gteq;}
       else if(o.compare('>'    )){mn = Mnemonic::gt;}
-      else if(o.compare('-','>')){mn = Mnemonic::ina;}
       else if(o.compare('.'    )){mn = Mnemonic::acc;}
       else
         {
@@ -454,7 +454,7 @@ run_last_phase(std::vector<Expression>&&  src)
 
       printf("\n");
 
-      throw Error(Cursor(),"演算結果が不正 %d",buf.size());
+      throw Error(Cursor(),"式生成の結果が不正 %d",buf.size());
     }
 
 
@@ -464,13 +464,34 @@ run_last_phase(std::vector<Expression>&&  src)
 
 Expression
 ExpressionMaker::
-operator()(Cursor&  cur)
+operator()(Cursor&  cur, char const*  onerr_msg)
 {
   clear();
 
-  run_first_phase(cur);
+    try
+    {
+      run_first_phase(cur);
+    }
 
-  return run_last_phase(std::move(output));
+    catch(Error&  e)
+    {
+      printf("%s 第一段階でエラー\n",onerr_msg);
+
+      throw;
+    }
+
+
+    try
+    {
+      return run_last_phase(std::move(output));
+    }
+
+    catch(Error&  e)
+    {
+      printf("%s 第二段階でエラー\n",onerr_msg);
+
+      throw;
+    }
 }
 
 

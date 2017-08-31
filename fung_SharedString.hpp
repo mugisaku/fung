@@ -18,21 +18,6 @@ SharedString
 {
   using String = BasicString<T>;
 
-  static size_t  length(T const*  s)
-  {
-    size_t  n = 0;
-
-      while(*s)
-      {
-        ++n;
-        ++s;
-      }
-
-
-    return n;
-  }
-
-
   struct{
     String*  string;
 
@@ -137,14 +122,14 @@ public:
 
   SharedString  add(T const*  src) const
   {
-    return add(src,length(src));
+    return add(src,String::length(src));
   }
 
   SharedString  add(T const*  src, size_t  len) const
   {
       if(length() == var.string->length())
       {
-        SharedString<T>  s(*this);
+        SharedString  s(*this);
 
         s.var.string->append(src,len);
 
@@ -154,7 +139,7 @@ public:
       }
 
 
-    SharedString<T>  s(var.string->data(),length());
+    SharedString  s(data(),length());
 
     s.var.string->append(src,len);
 
@@ -176,11 +161,11 @@ public:
 
           if(flag)
           {
-            auto  id = var.string->id();
+            auto  id_ = id();
 
             delete var.string;
 
-//            printf("%zd was deleted\n",id);
+//            printf("%zd was deleted\n",id_);
           }
       }
 
@@ -209,10 +194,15 @@ public:
 
   void  print() const
   {
-      for(int  i = 0;  i < var.length;  ++i)
+    printf("\"");
+
+      for(int  i = 0;  i < length();  ++i)
       {
         printf("%c",var.string->at(i));
       }
+
+
+    printf("\"");
   }
 
 };

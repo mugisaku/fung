@@ -24,11 +24,11 @@ process(std::string  s, int  n)
 void
 print(char const*  prefix, SharedString<char> const&  s)
 {
-  printf("%s ID:%zd REF:%2d \"",prefix,s.id(),s.use_count());
+  printf("%s ID:%zd REF:%2d -- ",prefix,s.id(),s.use_count());
 
   s.print();
 
-  printf("\"\n");
+  printf("\n");
 }
 
 

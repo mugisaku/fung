@@ -74,7 +74,7 @@ set(SOURCES
 include_directories(.)
 include_directories(./preprocessing)
 add_executable("fung${EXTENSION}" ${SOURCES} fung.cpp)
-add_executable("testString${EXTENSION}" ${SOURCES} testString.cpp)
+add_executable("testString${EXTENSION}" testString.cpp)
 
 
 

@@ -156,7 +156,7 @@ print() const
       printf("%d",data.integer);
       break;
   case(ValueKind::string):
-      printf("\"%s\"",data.string.data());
+      data.string.print();
       break;
   case(ValueKind::function):
       data.function->print();

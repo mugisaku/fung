@@ -14,7 +14,7 @@ namespace{
 
 
 Statement
-read_statement(Cursor&  cur)
+read_statement(Cursor&  cur, std::string const&  fn_name)
 {
   Statement  stmt;
 
@@ -28,7 +28,11 @@ read_statement(Cursor&  cur)
         {
           ExpressionMaker  mk;
 
-          ReturnStatement  ret(mk(cur));
+          char  buf[256];
+
+          snprintf(buf,sizeof(buf),"関数%s内return文:",fn_name.data());
+
+          ReturnStatement  ret(mk(cur,buf));
 
           stmt = Statement(std::move(ret));
         }
@@ -88,7 +92,7 @@ read_statement(Cursor&  cur)
 
 
 FunctionBody
-read_function_body(Cursor&  cur)
+read_function_body(Cursor&  cur, std::string const&  id)
 {
   FunctionBody  body;
 
@@ -113,7 +117,7 @@ read_function_body(Cursor&  cur)
 
       else
         {
-          auto  stmt = read_statement(cur);
+          auto  stmt = read_statement(cur,id);
 
             if(stmt)
             {
@@ -178,7 +182,7 @@ process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
             {
               cur += 1;
 
-              body = read_function_body(cur);
+              body = read_function_body(cur,id);
             }
 
 

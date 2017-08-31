@@ -39,7 +39,7 @@ ExpressionMaker
   void  push_operand(Expression&&  expr);
 
 public:
-  Expression  operator()(Cursor&  cur);
+  Expression  operator()(Cursor&  cur, char const*  onerr_msg="");
 
   TinyString const&  get_last_operator() const{return last_operator;}
 
