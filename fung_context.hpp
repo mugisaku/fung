@@ -18,7 +18,7 @@ class GlobalSpace;
 class
 Context
 {
-  GlobalSpace const*  global_space;
+  std::unique_ptr<GlobalSpace> const&  global_space;
 
   std::vector<ExecutionFrame>  frame_stack;
 
@@ -27,14 +27,14 @@ Context
   bool  interruption_flag=false;
 
 public:
-  Context(std::unique_ptr<GlobalSpace> const&  gsp): global_space(gsp.get()){}
+  Context(std::unique_ptr<GlobalSpace> const&  gsp): global_space(gsp){}
 
   std::vector<ExecutionFrame> const*  operator->() const{return &frame_stack;}
 
   bool  prepare_to_run(std::string const&  function_name);
   bool  run();
 
-  void  enter(Function const&  fn);
+  void  enter(std::string const&  fn_name, Function const&  fn);
   void  leave();
 
   void  entry(std::string const&  name, Expression const&  expr);

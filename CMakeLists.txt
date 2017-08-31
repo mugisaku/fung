@@ -58,6 +58,7 @@ set(SOURCES
   fung_value__convert.cpp
   fung_space.cpp
   fung_context.cpp
+  fung_variable.cpp
   fung_GlobalSpace.cpp
   fung_ExecutionFrame.cpp
   fung_cursor.cpp
@@ -65,7 +66,7 @@ set(SOURCES
   fung_unicode.cpp
   fung_token.cpp
   fung__read_token.cpp
-  fung__read_parameter_list.cpp
+  fung__read_list.cpp
   fung__make_global_space.cpp
 )
 

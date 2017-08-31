@@ -16,12 +16,15 @@ ValueKind
 {
   null,
 
+  unevaluated,
   undefined,
+
   boolean,
   integer,
   function,
   string,
   list,
+
   any,
 
   nullpointer,

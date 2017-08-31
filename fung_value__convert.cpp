@@ -1,5 +1,6 @@
 #include"fung_value.hpp"
 #include"fung_function.hpp"
+#include<cstdlib>
 
 
 
@@ -83,7 +84,7 @@ convert_to_integer() const
       return *this;
       break;
   case(ValueKind::string):
-      return Value(std::stoi(*data.string));
+      return Value(static_cast<int>(std::strtol(data.string.data(),nullptr,0)));
       break;
     }
 

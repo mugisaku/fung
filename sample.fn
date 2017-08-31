@@ -1,17 +1,25 @@
 
 
 
+integer  number(255)
+integer  age(17)
+
+string  s("yogult:")
+
+list  ls("first",number,age)
+
+
 function
 f(list  ls, integer  n)->list
 {
-  return n? f(ls+n,n-1):ls;
+  return n? f(ls+s,n-1):ls;
 }
 
 
 function
 main()->list
 {
-  return f(list(),8);
+  return f(ls,8);
 }
 
 

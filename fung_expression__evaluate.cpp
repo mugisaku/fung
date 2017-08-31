@@ -92,6 +92,8 @@ operate(Context&  ctx, bool  b) const
 
     if(mnemonic == Mnemonic::cal)
     {
+      static std::string  const fn_name("匿名関数");
+
         if(lv != ValueKind::function)
         {
           throw Error("関数呼び出しの左辺が関数参照ではない");
@@ -106,7 +108,11 @@ operate(Context&  ctx, bool  b) const
         }
 
 
-      return (*lv->function)(ctx,rv->list);
+      auto  flag = left->get_kind() == ExpressionKind::identifier;      
+
+      auto&  name = flag? (*left)->identifier.string:fn_name;
+
+      return (*lv->function)(name,ctx,rv->list);
     }
 
 
@@ -211,13 +217,14 @@ evaluate(Context&  ctx, bool  b) const
 ValueList
 read_list(ValueList  ls, ExpressionList::const_iterator  it, ExpressionList::const_iterator  end, Context&  ctx)
 {
-  return(it != end)? read_list(ls+it->evaluate(ctx),it+1,end,ctx):std::move(ls);
+  return(it != end)? read_list(ls+it->evaluate(ctx),it+1,end,ctx):ls;
 }
 
 
 ValueList
 to_value_list(ExpressionList const&  ls, Context&  ctx)
 {
+
   return read_list(ValueList(),ls.cbegin(),ls.cend(),ctx);
 }
 

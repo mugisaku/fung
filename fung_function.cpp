@@ -10,17 +10,17 @@ namespace fung{
 
 Value
 Function::
-operator()(Context&  ctx, std::initializer_list<Value>  args) const
+operator()(std::string const&  name, Context&  ctx, std::initializer_list<Value>  args) const
 {
   ValueList  buf = args;
 
-  return (*this)(ctx,buf);
+  return (*this)(name,ctx,buf);
 }
 
 
 Value
 Function::
-operator()(Context&  ctx, ValueList const&  args) const
+operator()(std::string const&  name, Context&  ctx, ValueList const&  args) const
 {
     if(parameter_list.size() != args.length())
     {
@@ -28,7 +28,7 @@ operator()(Context&  ctx, ValueList const&  args) const
     }
 
 
-  ctx.enter(*this);
+  ctx.enter(name,*this);
 
   auto  it = args.cbegin();
 
@@ -69,7 +69,7 @@ void
 Function::
 print() const
 {
-  printf("function %s(",name.data());
+  printf("(");
 
   auto        it = parameter_list.cbegin();
   auto const end = parameter_list.cend();

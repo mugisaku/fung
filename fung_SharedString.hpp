@@ -2,7 +2,7 @@
 #define FUNG_SharedString_HPP_INCLUDED
 
 
-#include<string>
+#include"fung_BasicString.hpp"
 #include<cstdio>
 #include<cstdint>
 #include<initializer_list>
@@ -16,6 +16,8 @@ template<typename  T>
 class
 SharedString
 {
+  using String = BasicString<T>;
+
   static size_t  length(T const*  s)
   {
     size_t  n = 0;
@@ -31,40 +33,8 @@ SharedString
   }
 
 
-  template<typename  U>
-  class String: public std::basic_string<U>{
-    size_t  reference_count=0;
-
-  public:
-    String(std::basic_string<U>&&  src): std::basic_string<U>(std::move(src)){}
-
-    uintptr_t  id() const{return reinterpret_cast<uintptr_t>(this);}
-
-    void  refer()
-    {
-      ++reference_count;
-    }
-
-    size_t  unrefer()
-    {
-      return --reference_count;
-    }
-
-    void  start_reference_count()
-    {
-      reference_count = 1;
-    }
-
-    size_t  get_reference_count()
-    {
-      return reference_count;
-    }
-
-  };
-
-
   struct{
-    String<T>*  string;
+    String*  string;
 
     size_t  length;
 
@@ -74,7 +44,7 @@ SharedString
 public:
   SharedString()
   {
-    var.string = new String<T>(std::basic_string<T>());
+    var.string = new String();
     var.length = 0;
 
     var.string->start_reference_count();
@@ -82,7 +52,7 @@ public:
 
   SharedString(std::initializer_list<T>  ls)
   {
-    var.string = new String<T>(std::basic_string<T>(ls));
+    var.string = new String(ls);
     var.length = var.string->length();
 
     var.string->start_reference_count();
@@ -90,7 +60,7 @@ public:
 
   SharedString(T const*  src)
   {
-    var.string = new String<T>(std::basic_string<T>(src));
+    var.string = new String(src);
     var.length = var.string->length();
 
     var.string->start_reference_count();
@@ -98,15 +68,15 @@ public:
 
   SharedString(T const*  src, size_t  len)
   {
-    var.string = new String<T>(std::basic_string<T>(src,len));
+    var.string = new String(src,len);
     var.length = len;
 
     var.string->start_reference_count();
   }
 
-  SharedString(std::basic_string<T>&&  s)
+  SharedString(String&&  s)
   {
-    var.string = new String<T>(std::move(s));
+    var.string = new String(std::move(s));
     var.length = var.string->length();
 
     var.string->start_reference_count();
@@ -156,8 +126,8 @@ public:
   }
 
 
-  std::basic_string<T> const&  operator*() const{return *var.string;}
-  std::basic_string<T> const*  operator->() const{return var.string;}
+  String const&  operator*() const{return *var.string;}
+  String const*  operator->() const{return var.string;}
 
 
   SharedString  add(SharedString const&  rhs) const
@@ -184,7 +154,7 @@ public:
       }
 
 
-    SharedString<T>  s(std::basic_string<T>(var.string->data(),length()));
+    SharedString<T>  s(var.string->data(),length());
 
     s.var.string->append(src,len);
 
@@ -221,13 +191,16 @@ public:
 
   bool  unique() const{return(var.string->reference_count() == 1);}
 
-  size_t  use_count() const{return var.string? var.string->get_reference_count():0;}
+  size_t  use_count() const{return var.string? var.string->reference_count():0;}
 
   uintptr_t  id() const{return var.string? var.string->id():0;}
 
   T const*  data() const{return var.string->data();}
 
   T const&  back() const{return var.string->back();}
+
+  T const*  begin() const{return var.string->data()         ;}
+  T const*    end() const{return var.string->data()+length();}
 
   T const*  cbegin() const{return var.string->data()         ;}
   T const*    cend() const{return var.string->data()+length();}

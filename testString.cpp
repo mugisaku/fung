@@ -35,7 +35,7 @@ print(char const*  prefix, SharedString<char> const&  s)
 int
 main(int  argc, char**  argv)
 {
-  SharedString<char>  s0(std::string("abc"));
+  SharedString<char>  s0("abc");
 
   print("s0",s0);
 

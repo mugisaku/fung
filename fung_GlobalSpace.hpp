@@ -23,11 +23,7 @@ GlobalSpace: public Space
 public:
   GlobalSpace();
 
-  Function const&  append_function(Function*  fn);
-
-  Function const*  find_function(std::string const&  name) const;
-
-  void  print() const;
+  void  append_function(std::string&&  name, Function*  fn);
 
 };
 

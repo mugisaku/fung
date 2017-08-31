@@ -3,6 +3,7 @@
 #include"fung_function.hpp"
 #include"fung_identifier.hpp"
 #include"fung_GlobalSpace.hpp"
+#include"fung_variable.hpp"
 #include"fung_error.hpp"
 #include<cstdlib>
 
@@ -144,36 +145,6 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
 
 
   return std::move(expr);
-}
-
-
-ArgumentList
-read_argument_list(Cursor&  cur)
-{
-  ArgumentList  ls;
-
-    for(;;)
-    {
-      ExpressionMaker  mk;
-
-      auto  expr = mk(cur);
-
-        if(expr)
-        {
-          ls.emplace_back(std::move(expr));
-        }
-
-
-      auto  o = mk.get_last_operator();
-
-        if(!o.compare(','))
-        {
-          break;
-        }
-    }
-
-
-  return std::move(ls);
 }
 
 
@@ -368,7 +339,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
 
           cur += 1;
 
-          auto  expr = Expression(read_argument_list(cur));
+          auto  expr = Expression(read_expression_list(cur));
 
           expr = read_postfix_expression(cur,std::move(expr));
 

@@ -182,7 +182,7 @@ process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
             }
 
 
-          gsp->append_function(new Function(*gsp,std::move(id),std::move(parals),Value::to_kind(return_type),std::move(body)));
+          gsp->append_function(std::move(id),new Function(*gsp,std::move(parals),Value::to_kind(return_type),std::move(body)));
         }
 
       else
@@ -195,6 +195,36 @@ process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
     {
       throw Error("不明な字句が続いている");
     }
+}
+
+
+void
+process_constant(ValueKind  k, Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
+{
+  skip_spaces_and_newline(cur);
+
+    if(!isident0(*cur))
+    {
+      throw Error(cur,"定数の識別子がない");
+    }
+
+
+  auto  id = read_identifier(cur);
+
+  skip_spaces_and_newline(cur);
+
+    if(*cur != '(')
+    {
+      throw Error(cur,"定数の定義がない");
+    }
+
+
+  cur += 1;
+
+  auto  exprls = read_expression_list(cur);
+
+
+  gsp->append_constant(new Constant(k,std::move(id),std::move(exprls)));
 }
 
 
@@ -224,19 +254,19 @@ make_global_space(Cursor&  cur)
 
                 if(id == "function"){process_function(cur,gsp);}
               else
+                if((id == "integer") ||
+                   (id == "boolean") ||
+                   (id ==  "string") ||
+                   (id ==    "list"))
                 {
-                  auto  fn = gsp->find_function(id);
+                  process_constant(Value::to_kind(id),cur,gsp);
+                }
 
-                    if(fn)
-                    {
-                    }
+              else
+                {
+                  tok.print();
 
-                  else
-                    {
-                      tok.print();
-
-                      throw Error("不明な字句が続いている");
-                    }
+                  throw Error("不明な字句が続いている");
                 }
             }
 

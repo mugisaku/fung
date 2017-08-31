@@ -16,8 +16,8 @@ Value  const undefined(ValueKind::undefined);
 
 Value::Value(int  i): kind(ValueKind::integer){data.integer = i;}
 Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
-Value::Value(Function const*  fn): kind(ValueKind::function){data.function = fn;}
-Value::Value(std::string&&  s): kind(ValueKind::string){new(&data) SharedString<char>(std::move(s));}
+Value::Value(Function const&  fn): kind(ValueKind::function){data.function = &fn;}
+Value::Value(std::string const&  s): kind(ValueKind::string){new(&data) SharedString<char>(s.data(),s.size());}
 Value::Value(SharedString<char>&&  s): kind(ValueKind::string){new(&data) SharedString<char>(std::move(s));}
 Value::Value(Value*  v): kind(ValueKind::any){data.value = v;}
 Value::Value(ValueList&&  ls): kind(ValueKind::list){new(&data) ValueList(std::move(ls));}
@@ -36,6 +36,7 @@ operator=(Value const&  rhs) noexcept
     switch(kind)
     {
   case(ValueKind::null):
+  case(ValueKind::unevaluated):
   case(ValueKind::undefined):
       break;
   case(ValueKind::boolean):
@@ -74,6 +75,7 @@ operator=(Value&&  rhs) noexcept
     switch(kind)
     {
   case(ValueKind::null):
+  case(ValueKind::unevaluated):
   case(ValueKind::undefined):
       break;
   case(ValueKind::boolean):
@@ -110,6 +112,7 @@ clear()
     switch(kind)
     {
   case(ValueKind::null):
+  case(ValueKind::unevaluated):
   case(ValueKind::undefined):
   case(ValueKind::boolean):
   case(ValueKind::integer):
@@ -139,6 +142,9 @@ print() const
     {
   case(ValueKind::null):
       printf("NULL ");
+      break;
+  case(ValueKind::unevaluated):
+      printf("UNEVALUATED ");
       break;
   case(ValueKind::undefined):
       printf("UNDEFINED ");
@@ -208,11 +214,15 @@ to_string(ValueKind  k)
   static std::string  const l("list");
   static std::string  const a("any");
   static std::string  const u("undefined");
+  static std::string  const n("unevaluated");
   static std::string  const f("function");
 
     switch(k)
     {
   case(ValueKind::null):
+      break;
+  case(ValueKind::unevaluated):
+      return n;
       break;
   case(ValueKind::undefined):
       break;

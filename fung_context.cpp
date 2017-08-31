@@ -17,15 +17,23 @@ prepare_to_run(std::string const&  function_name)
 {
   frame_stack.clear();
 
-  auto  fn = global_space->find_function(function_name);
+  auto&  c = global_space->find_constant(function_name);
 
-    if(fn)
+    if(c)
     {
-      returned_value = undefined;
+        if(c->value_kind == ValueKind::function)
+        {
+          returned_value = undefined;
 
-      enter(*fn);
+          enter(function_name,*c->value->function);
 
-      return true;
+          return true;
+        }
+
+      else
+        {
+          printf("%sは関数ではない",function_name.data());
+        }
     }
 
 
@@ -68,7 +76,7 @@ run()
 
 void
 Context::
-enter(Function const&  fn)
+enter(std::string const&  fn_name, Function const&  fn)
 {
     if(frame_stack.size() > 1000)
     {
@@ -76,7 +84,7 @@ enter(Function const&  fn)
     }
 
 
-  frame_stack.emplace_back(fn);
+  frame_stack.emplace_back(fn_name,fn);
 }
 
 
@@ -122,9 +130,7 @@ find_value(std::string const&  name) const
     }
 
 
-  auto  fn = global_space->find_function(name);
-
-  return fn? Value(fn):Value();
+  return Value();
 }
 
 
@@ -132,34 +138,35 @@ Value
 Context::
 operator[](std::string const&  name) const
 {
-    if(frame_stack.empty())
+  char const*  prefix = "無名関数";
+
+    if(frame_stack.size())
     {
-      throw Error("フレームが無い");
-    }
+      auto&  f = frame_stack.back();
 
+      prefix = f.get_function_name().data();
 
-  auto&  f = frame_stack.back();
+      auto  var = f.find_variable(name);
 
-  auto  var = f.find_variable(name);
-
-    if(var)
-    {
-      return var->value;
+        if(var)
+        {
+          return var->value;
+        }
     }
 
 
     if(global_space)
     {
-      auto  fn = global_space->find_function(name);
+      auto&  con = global_space->find_constant(name);
 
-        if(fn)
+        if(con)
         {
-          return Value(fn);
+          return con->get_value(global_space);
         }
     }
 
 
-  throw Error("関数%sで %s がみつからない",f.get_function().get_name().data(),name.data());
+  throw Error("%sで %s がみつからない",prefix,name.data());
 }
 
 

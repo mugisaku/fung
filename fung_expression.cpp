@@ -1,6 +1,7 @@
 #include"fung_expression.hpp"
 #include"fung_function.hpp"
 #include"fung_cursor.hpp"
+#include"fung_variable.hpp"
 #include<new>
 
 

@@ -48,11 +48,11 @@ public:
    explicit Value(ValueKind  k): kind(k){}
    explicit Value(int  i);
    explicit Value(bool  b);
-   explicit Value(std::string&&  s);
+   explicit Value(std::string const&  s);
    explicit Value(SharedString<char>&&  s);
    explicit Value(Value*  v);
    explicit Value(ValueList&&  ls);
-   explicit Value(Function const*  fn);
+   explicit Value(Function const&  fn);
    Value(Value const&  rhs) noexcept{*this = rhs;}
    Value(Value&&       rhs) noexcept{*this = std::move(rhs);}
   ~Value(){clear();}

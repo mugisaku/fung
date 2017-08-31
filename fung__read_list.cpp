@@ -1,6 +1,7 @@
 #include"fung.hpp"
 #include"fung_identifier.hpp"
 #include"fung_parameter.hpp"
+#include"fung_ExpressionMaker.hpp"
 #include"fung_error.hpp"
 
 
@@ -99,6 +100,36 @@ read_parameter_list(Cursor&  cur)
   else
     {
       cur += 1;
+    }
+
+
+  return std::move(ls);
+}
+
+
+ExpressionList
+read_expression_list(Cursor&  cur)
+{
+  ExpressionList  ls;
+
+    for(;;)
+    {
+      ExpressionMaker  mk;
+
+      auto  expr = mk(cur);
+
+        if(expr)
+        {
+          ls.emplace_back(std::move(expr));
+        }
+
+
+      auto  o = mk.get_last_operator();
+
+        if(!o.compare(','))
+        {
+          break;
+        }
     }
 
 

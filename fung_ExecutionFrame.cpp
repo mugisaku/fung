@@ -9,7 +9,8 @@ namespace fung{
 
 
 ExecutionFrame::
-ExecutionFrame(Function const&  fn):
+ExecutionFrame(std::string const&  fn_name, Function const&  fn):
+function_name(fn_name),
 function(fn),
 current(fn.get_body().cbegin()),
 end(fn.get_body().cend())

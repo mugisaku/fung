@@ -5,28 +5,18 @@
 #include"fung_value.hpp"
 #include"fung_error.hpp"
 #include"fung_function.hpp"
+#include"fung_variable.hpp"
 #include<vector>
-#include<memory>
 
 
 namespace fung{
 
 
-struct
-Variable
-{
-  std::string  name;
-
-  Value  value;
-
-  Variable(std::string const&  name_, Value const&  v): name(name_), value(v){}
-
-};
-
-
 class
 ExecutionFrame
 {
+  std::string const&  function_name;
+
   Function const&  function;
 
   std::vector<Variable>  variable_list;
@@ -35,8 +25,9 @@ ExecutionFrame
   FunctionBody::const_iterator      end;
 
 public:
-  ExecutionFrame(Function const&  fn);
+  ExecutionFrame(std::string const&  fn_name, Function const&  fn);
 
+  std::string const&  get_function_name() const{return function_name;}
   Function const&  get_function() const{return function;}
 
   void  append_variable(Variable&&  var);
