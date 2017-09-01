@@ -1,4 +1,5 @@
-#include"fung_SharedString.hpp"
+#include"fung_branch.hpp"
+#include"fung_WeakReference.hpp"
 #include<cstdio>
 #include<string>
 #include<ctime>
@@ -7,8 +8,8 @@
 using namespace fung;
 
 
-SharedString<char>
-process(SharedString<char>  s, int  n)
+Branch<char>
+process(Branch<char>  s, int  n)
 {
   return n? process(s+'_',n-1):s;
 }
@@ -22,7 +23,7 @@ process(std::string  s, int  n)
 
 
 void
-print(char const*  prefix, SharedString<char> const&  s)
+print(char const*  prefix, Branch<char> const&  s)
 {
   printf("%s ID:%zd REF:%2d -- ",prefix,s.id(),s.use_count());
 
@@ -35,19 +36,19 @@ print(char const*  prefix, SharedString<char> const&  s)
 int
 main(int  argc, char**  argv)
 {
-  SharedString<char>  s0("abc");
+  Branch<char>  s0("abc");
 
   print("s0",s0);
 
-  SharedString<char>  s1(s0+"def");
+  Branch<char>  s1(s0+"def");
 
   print("s1",s1);
 
-  SharedString<char>  s2 = process(s1,4);
+  Branch<char>  s2 = process(s1,4);
 
   print("s2",s2);
 
-  SharedString<char>  s3(s1+"ghi");
+  Branch<char>  s3(s1+"ghi");
 
   print("s3",s3);
 
@@ -58,7 +59,7 @@ main(int  argc, char**  argv)
 
   start = std::clock();
 
-  SharedString<char>  s4 = process(s0,n);
+  Branch<char>  s4 = process(s0,n);
 
   printf("s4 ID:%zd\n",s4.id());
 

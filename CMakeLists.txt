@@ -62,6 +62,7 @@ set(SOURCES
   fung_GlobalSpace.cpp
   fung_ExecutionFrame.cpp
   fung_cursor.cpp
+  fung_pointer.cpp
   fung__skip.cpp
   fung_unicode.cpp
   fung_token.cpp
@@ -74,7 +75,9 @@ set(SOURCES
 include_directories(.)
 include_directories(./preprocessing)
 add_executable("fung${EXTENSION}" ${SOURCES} fung.cpp)
-add_executable("testString${EXTENSION}" testString.cpp)
+add_executable("testBasicString${EXTENSION}" testBasicString.cpp)
+add_executable("testBranch${EXTENSION}" testBranch.cpp)
+add_executable("testBranchBud${EXTENSION}" testBranchBud.cpp)
 
 
 

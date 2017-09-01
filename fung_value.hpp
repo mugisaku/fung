@@ -4,6 +4,7 @@
 
 #include"fung_ValueKind.hpp"
 #include"fung_SharedString.hpp"
+#include"fung_pointer.hpp"
 #include<vector>
 #include<string>
 
@@ -31,6 +32,8 @@ ValueData
   ValueList  list;
 
   Function const*  function;
+
+  Pointer  pointer;
 
    ValueData(){}
   ~ValueData(){}
