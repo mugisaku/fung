@@ -208,6 +208,31 @@ Value  Value::bit_not(Value const&  lhs){return(lhs == ValueKind::integer)? Valu
 Value  Value::    neg(Value const&  lhs){return(lhs == ValueKind::integer)? Value(-lhs->integer):undefined;}
 
 
+template<typename  T>
+Value
+dereference(T&  t)
+{
+  return t.test()? Value(t.branch()):undefined;
+}
+
+
+Value
+Value::
+der(Value const&  lhs)
+{
+    if(lhs == ValueKind::pointer)
+    {
+      auto&  ptr = lhs->pointer;
+
+           if(ptr == PointerKind::string){return dereference(lhs->pointer->string_bud);}
+      else if(ptr == PointerKind::list  ){return dereference(lhs->pointer->list_bud  );}
+    }
+
+
+  return undefined;
+}
+
+
 
 
 }

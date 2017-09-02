@@ -72,16 +72,16 @@ isidentn(integer  c)->boolean
 
 
 function
-read_identifier(list  ls)->list
+read_identifier(pointer  p)->list
 {
-  return list();
+  return list(*p);
 }
 
 
 function
 main()->list
 {
-  return list(isident0('_'));
+  return read_identifier("abcd".pointer);
 }
 
 

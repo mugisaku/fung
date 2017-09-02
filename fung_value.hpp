@@ -52,6 +52,7 @@ public:
    explicit Value(Value*  v);
    explicit Value(List&&  ls);
    explicit Value(Function const&  fn);
+   explicit Value(Pointer&&  ptr);
    Value(Value const&  rhs) noexcept{*this = rhs;}
    Value(Value&&       rhs) noexcept{*this = std::move(rhs);}
   ~Value(){clear();}
@@ -104,6 +105,7 @@ public:
   static Value  log_not(Value const&  lhs);
   static Value  bit_not(Value const&  lhs);
   static Value      neg(Value const&  lhs);
+  static Value      der(Value const&  lhs);
 
 };
 

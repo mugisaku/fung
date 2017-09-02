@@ -21,6 +21,7 @@ Value::Value(std::string const&  s): kind(ValueKind::string){new(&data) String(s
 Value::Value(String&&  s): kind(ValueKind::string){new(&data) String(std::move(s));}
 Value::Value(Value*  v): kind(ValueKind::any){data.value = v;}
 Value::Value(List&&  ls): kind(ValueKind::list){new(&data) List(std::move(ls));}
+Value::Value(Pointer&&  ptr): kind(ValueKind::pointer){new(&data) Pointer(std::move(ptr));}
 
 
 
@@ -53,6 +54,9 @@ operator=(Value const&  rhs) noexcept
       break;
   case(ValueKind::list):
       new(&data) List(rhs.data.list);
+      break;
+  case(ValueKind::pointer):
+      new(&data) Pointer(rhs.data.pointer);
       break;
   case(ValueKind::function):
       data.function = rhs.data.function;
@@ -93,6 +97,9 @@ operator=(Value&&  rhs) noexcept
   case(ValueKind::list):
       new(&data) List(std::move(rhs.data.list));
       break;
+  case(ValueKind::pointer):
+      new(&data) Pointer(std::move(rhs.data.pointer));
+      break;
   case(ValueKind::function):
       data.function = rhs.data.function;
       break;
@@ -126,6 +133,9 @@ clear()
       break;
   case(ValueKind::list):
       data.list.~Branch();
+      break;
+  case(ValueKind::pointer):
+      data.pointer.~Pointer();
       break;
     }
 
@@ -164,6 +174,9 @@ print() const
   case(ValueKind::any):
       data.value->print();
       break;
+  case(ValueKind::pointer):
+      data.pointer.print();
+      break;
   case(ValueKind::list):
       {
         auto   it = data.list.cbegin();
@@ -197,6 +210,7 @@ to_kind(std::string const&  s)
   else if(s == "string"  ){return ValueKind::string;}
   else if(s == "function"){return ValueKind::function;}
   else if(s == "list"    ){return ValueKind::list;}
+  else if(s == "pointer" ){return ValueKind::pointer;}
   else if(s == "any"     ){return ValueKind::any;}
 
 
@@ -216,6 +230,7 @@ to_string(ValueKind  k)
   static std::string  const u("undefined");
   static std::string  const n("unevaluated");
   static std::string  const f("function");
+  static std::string  const p("pointer");
 
     switch(k)
     {
@@ -240,6 +255,9 @@ to_string(ValueKind  k)
       break;
   case(ValueKind::list):
       return l;
+      break;
+  case(ValueKind::pointer):
+      return p;
       break;
   case(ValueKind::any):
       return a;

@@ -28,10 +28,11 @@ get_property(std::string const&  name) const
       break;
   case(ValueKind::string):
            if(name == "length"){return Value(static_cast<int>(data.string.length()));}
-      else if(name == "pointer"){return Value(static_cast<int>(data.string.length()));}
+      else if(name == "pointer"){return Value(Pointer(data.string));}
       break;
   case(ValueKind::list):
-        if(name == "length"){return Value(static_cast<int>(data.list.length()));}
+           if(name == "length"){return Value(static_cast<int>(data.list.length()));}
+      else if(name == "pointer"){return Value(Pointer(data.list));}
       break;
   case(ValueKind::any):
       break;

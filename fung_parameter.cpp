@@ -10,7 +10,7 @@ void
 Parameter::
 print() const
 {
-  printf("%s",name.data());
+  printf("%s  %s",Value::to_string(value_kind).data(),name.data());
 
     if(expression)
     {

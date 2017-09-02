@@ -242,6 +242,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
            if(o.compare('!')){unop_stack.emplace_back('!');}
       else if(o.compare('~')){unop_stack.emplace_back('~');}
       else if(o.compare('-')){unop_stack.emplace_back('-');}
+      else if(o.compare('*')){unop_stack.emplace_back('*');}
 
       last_is_operand = false;
     }

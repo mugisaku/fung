@@ -88,7 +88,7 @@ operate(Context&  ctx, bool  b) const
        if(mnemonic == Mnemonic::neg    ){return Value::neg(    lv);}
   else if(mnemonic == Mnemonic::log_not){return Value::log_not(lv);}
   else if(mnemonic == Mnemonic::bit_not){return Value::bit_not(lv);}
-
+  else if(mnemonic == Mnemonic::der    ){return Value::der(    lv);}
 
     if(mnemonic == Mnemonic::cal)
     {

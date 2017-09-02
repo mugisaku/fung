@@ -24,11 +24,10 @@ ValueKind
   function,
   string,
   list,
+  pointer,
 
   any,
 
-  nullpointer,
-  pointer,
   reference,
   object,
 

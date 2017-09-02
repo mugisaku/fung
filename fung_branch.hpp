@@ -15,7 +15,7 @@ template<typename  T>
 class
 Branch
 {
-  static constexpr bool  debug = true;
+  static constexpr bool  debug = false;
 
   using String = BasicString<T>;
 
@@ -62,7 +62,7 @@ Branch
         }
     }
 
-    void    refer_weakly()
+    void  refer_weakly()
     {
       ++var.weak_reference_count;
 
@@ -194,9 +194,10 @@ private:
 
 
 public:
-  Branch(                            ): var(new String(   ),0){}
-  Branch(std::initializer_list<T>  ls): var(new String( ls)  ){}
-  Branch(T const*  src):                var(new String(src)  ){}
+  Branch(                            ): var(new String(       ),0){}
+  Branch(std::initializer_list<T>  ls): var(new String( ls    )  ){}
+  Branch(T const*  src             ):   var(new String(src    )  ){}
+  Branch(T const*  src, size_t  len):   var(new String(src,len)){}
 
   Branch(Branch const&  rhs) noexcept
   {
@@ -216,7 +217,13 @@ public:
  
  ~Branch()
   {
-    auto  id = var.link->id();
+      if(!var.link)
+      {
+        return;
+      }
+
+
+    auto  id_ = id();
 
     var.link->unrefer();
 
@@ -234,7 +241,7 @@ public:
 
               if(debug)
               {
-                printf("Link[%zd] was deleted by Branch\n",id);
+                printf("Link[%zd] was deleted by Branch\n",id_);
               }
           }
       }
@@ -277,6 +284,8 @@ public:
 
   bool  unique() const{return(var.link->reference_count() == 1);}
 
+  size_t  id() const{return var.link->id();}
+
   size_t      use_count() const{return var.link->reference_count();}
   size_t  observe_count() const{return var.link->weak_reference_count();}
 
@@ -292,7 +301,7 @@ public:
 
   size_t  length() const{return var.length;}
 
-  Bud  bud()
+  Bud  bud() const
   {
     return Bud(*var.link,length());
   }
