@@ -138,8 +138,6 @@ public:
     return true;
   }
 
-  uintptr_t  id() const{return reinterpret_cast<uintptr_t>(this);}
-
   void  clear()
   {
     delete[] var.pointer          ;
@@ -219,6 +217,8 @@ public:
     return std::move(s);
   }
 
+
+  uintptr_t  id() const{return reinterpret_cast<uintptr_t>(this);}
 
   static size_t  length(T const*  s)
   {

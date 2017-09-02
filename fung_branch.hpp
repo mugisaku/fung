@@ -11,54 +11,90 @@
 namespace fung{
 
 
-
 template<typename  T>
 class
 Branch
 {
-  class String: public BasicString<T>
-  {
-    struct{
-      size_t  reference_count=0;
+  static constexpr bool  debug = true;
 
-    } var;
+  using String = BasicString<T>;
 
-  public:
-    template<typename...  Args>
-    String(Args...  args): BasicString<T>(args...){}
-
-    void      refer(){       ++var.reference_count;}
-    size_t  unrefer(){return --var.reference_count;}
-
-    size_t  reference_count() const{return var.reference_count;}
-
-    void  start_reference_count(){var.reference_count = 1;}
-  };
-
-public:
   class Link{
     struct{
-      String*  target=nullptr;
+      String*  target;
 
-      size_t  reference_count=0;
+      size_t       reference_count=1;
+      size_t  weak_reference_count=0;
 
     } var;
 
   public:
-    Link(String*  target_){var.target = target_;}
+    Link(String*  s){var.target = s;}
+
+    operator bool() const{return var.target;}
+
+    uintptr_t  id() const{return reinterpret_cast<uintptr_t>(this);}
 
     String*  target() const{return var.target;}
 
-    void      refer(){       ++var.reference_count;}
-    size_t  unrefer(){return --var.reference_count;}
+    void  refer()
+    {
+      ++var.reference_count;
 
-    void  unlink(){var.target = nullptr;}
+        if(debug)
+        {
+          print();
+        }
+    }
 
-    size_t  reference_count() const{return var.reference_count;}
+    void  unrefer()
+    {
+        if(!--var.reference_count)
+        {
+          delete var.target          ;
+                 var.target = nullptr;
+        }
 
+
+        if(debug)
+        {
+          print();
+        }
+    }
+
+    void    refer_weakly()
+    {
+      ++var.weak_reference_count;
+
+        if(debug)
+        {
+          print();
+        }
+    }
+
+    void  unrefer_weakly()
+    {
+      --var.weak_reference_count;
+
+        if(debug)
+        {
+          print();
+        }
+    }
+
+    size_t       reference_count() const{return var.reference_count;}
+    size_t  weak_reference_count() const{return var.weak_reference_count;}
+
+    void  print() const
+    {
+      auto   n =      reference_count();
+      auto  wn = weak_reference_count();
+
+      printf("now, Link[%zd] is refered by %d branch%s and %d bud%s\n",id(),n,(n > 1)? "es":"",wn,(wn > 1)? "s":"");
+    }
   };
 
-
+public:
   class Bud{
     struct{
       Link*  link=nullptr;
@@ -73,122 +109,137 @@ public:
       var.link   =    &ln;
       var.length = length;
 
-      ln.refer();
+      ln.refer_weakly();
+    }
+
+    Bud(Bud const&  rhs) noexcept
+    {
+      var = rhs.var;
+
+      var.link->refer_weakly();
+    }
+
+    Bud(Bud&&  rhs)
+    {
+      var = rhs.var;
+
+      rhs.var.link = nullptr;
     }
 
    ~Bud()
     {
         if(var.link)
         {
-          auto  s = var.link->target();
+          var.link->unrefer_weakly();
 
-            if(!var.link->unrefer())
+
+          auto  id = var.link->id();
+
+          auto   n = var.link->reference_count();
+          auto  wn = var.link->weak_reference_count();
+
+            if(!n && !wn)
             {
-                if(!s)
+              delete var.link;
+
+                if(debug)
                 {
-                  delete var.link;
-printf("Link was deleted by Bud\n");
+                  printf("Link[%zd] was deleted by Bud\n",id);
                 }
             }
         }
     }
 
 
+    Bud&  operator=(Bud const&  rhs) noexcept=delete;
+    Bud&  operator=(Bud&&  rhs) noexcept=delete;
+
     bool  test() const{return var.link->target();}
 
-    Branch  branch() const{return Branch(var.link->target(),var.length);}
+    Branch  branch() const{return Branch(var.link,var.length,nullptr,0);}
 
   };
 
 private:
-  struct{
-    String*  string=nullptr;
+  struct Var{
+    Link*  link=nullptr;
 
     size_t  length=0;
 
-    Link*  link=nullptr;
+    Var(                       ){}
+    Var(String*  s             ): link(new Link(s                )), length(s->length()){}
+    Var(String*  s, size_t  len): link(new Link(s                )), length(len){}
+    Var(T const* s, size_t  len): link(new Link(new String(s,len))), length(len){}
+    Var(Link*   ln, size_t  len): link(                         ln), length(len){}
 
   } var;
 
 
+  Branch(Link*  ln, size_t  len, T const*  add_src, size_t  add_len): var(ln,len)
+  {
+    ln->target()->append(add_src,add_len);
+
+    var.length += add_len;
+
+    ln->refer();
+  }
+
+
+  Branch(Branch const&  base, T const*  add_src, size_t  add_len): var(base.data(),base.length())
+  {
+    var.link->target()->append(add_src,add_len);
+
+    var.length += add_len;
+  }
+
+
 public:
-  Branch()
-  {
-    var.string = new String();
-    var.length = 0;
-
-    var.string->start_reference_count();
-  }
-
-  Branch(std::initializer_list<T>  ls)
-  {
-    var.string = new String(ls);
-    var.length = var.string->length();
-
-    var.string->start_reference_count();
-  }
-
-  Branch(T const*  src)
-  {
-    var.string = new String(src);
-    var.length = var.string->length();
-
-    var.string->start_reference_count();
-  }
-
-  Branch(T const*  src, size_t  len)
-  {
-    var.string = new String(src,len);
-    var.length = len;
-
-    var.string->start_reference_count();
-  }
-
-  Branch(String&&  s)
-  {
-    var.string = new String(std::move(s));
-    var.length = var.string->length();
-
-    var.string->start_reference_count();
-  }
-
-  Branch(String*  s, size_t  len=0)
-  {
-    var.string = s;
-    var.length = len;
-
-      if(s)
-      {
-        s->refer();
-      }
-  }
+  Branch(                            ): var(new String(   ),0){}
+  Branch(std::initializer_list<T>  ls): var(new String( ls)  ){}
+  Branch(T const*  src):                var(new String(src)  ){}
 
   Branch(Branch const&  rhs) noexcept
   {
-    var.string = rhs.var.string;
-    var.length = 0;
+    var = rhs.var;
 
-      if(var.string)
-      {
-        var.length = var.string->length();
-
-        var.string->refer();
-      }
+    var.link->refer();
   }
 
   Branch(Branch&&  rhs) noexcept
   {
-    var.string = rhs.var.string          ;
-                 rhs.var.string = nullptr;
+    var.link = rhs.var.link          ;
+               rhs.var.link = nullptr;
 
     var.length = rhs.var.length    ;
                  rhs.var.length = 0;
-
-    var.link = rhs.var.link          ;
-               rhs.var.link = nullptr;
   }
  
- ~Branch(){clear();}
+ ~Branch()
+  {
+    auto  id = var.link->id();
+
+    var.link->unrefer();
+
+      if(!var.link->reference_count())
+      {
+          if(debug)
+          {
+            printf("link target was deleted\n");
+          }
+
+
+          if(!var.link->weak_reference_count())
+          {
+            delete var.link;
+
+              if(debug)
+              {
+                printf("Link[%zd] was deleted by Branch\n",id);
+              }
+          }
+      }
+  }
+
 
   Branch&  operator=(Branch const&  rhs) noexcept=delete;
   Branch&  operator=(Branch&&       rhs) noexcept=delete;
@@ -199,34 +250,23 @@ public:
   Branch  operator+(T const&    t)            const{return add(t);}
 
 
-  String const&  operator*() const{return *var.string;}
-  String const*  operator->() const{return var.string;}
+  String const&  operator*() const{return *var.link->target();}
+  String const*  operator->() const{return var.link->target();}
 
+  String const&  string() const{return *var.link->target();}
 
   Branch  add(Branch const&  rhs) const{return add(rhs.data(),rhs.length());}
   Branch  add(T const*  src)            const{return add(src,String::length(src));}
 
   Branch  add(T const*  src, size_t  len) const
   {
-      if(length() == var.string->length())
+      if(length() == string().length())
       {
-        Branch  s(*this);
-
-        s.var.string->append(src,len);
-
-        s.var.length += len;
-
-        return std::move(s);
+        return Branch(var.link,length(),src,len);
       }
 
 
-    Branch  s(data(),length());
-
-    s.var.string->append(src,len);
-
-    s.var.length += len;
-
-    return std::move(s);
+    return Branch(*this,src,len);
   }
 
   Branch  add(T const&  t) const
@@ -234,89 +274,40 @@ public:
     return add(&t,1);
   }
 
-  void  clear()
-  {
-      if(var.string)
-      {
-        auto  flag = !var.string->unrefer();
 
-          if(flag)
-          {
-            auto  id_ = id();
+  bool  unique() const{return(var.link->reference_count() == 1);}
 
-            delete var.string;
+  size_t      use_count() const{return var.link->reference_count();}
+  size_t  observe_count() const{return var.link->weak_reference_count();}
 
+  T const*  data() const{return string().data();}
 
-            auto  ln = var.link;
+  T const&  back() const{return string().back();}
 
-              if(ln)
-              {
-                  if(!ln->reference_count())
-                  {
-                    delete ln;
-printf("Link was deleted by Branch\n");
-                  }
+  T const*  begin() const{return string().data()         ;}
+  T const*    end() const{return string().data()+length();}
 
-                else
-                  {
-                    ln->unlink();
-                  }
-              }
-
-
-printf("String [%zd] was deleted\n",id_);
-          }
-      }
-
-
-    var.string = nullptr;
-    var.length =       0;
-    var.link   = nullptr;
-  }
-
-  bool  unique() const{return(var.string->reference_count() == 1);}
-
-  size_t      use_count() const{return var.string? var.string->reference_count():0;}
-  size_t  observe_count() const{return var.link? var.link->reference_count():0;}
-
-  uintptr_t  id() const{return var.string? var.string->id():0;}
-
-  T const*  data() const{return var.string->data();}
-
-  T const&  back() const{return var.string->back();}
-
-  T const*  begin() const{return var.string->data()         ;}
-  T const*    end() const{return var.string->data()+length();}
-
-  T const*  cbegin() const{return var.string->data()         ;}
-  T const*    cend() const{return var.string->data()+length();}
+  T const*  cbegin() const{return string().data()         ;}
+  T const*    cend() const{return string().data()+length();}
 
   size_t  length() const{return var.length;}
 
   Bud  bud()
   {
-    auto&  ln = var.link;
-
-      if(!ln)
-      {
-        ln = new Link(var.string);
-      }
-
-
-    return Bud(*ln,length());
+    return Bud(*var.link,length());
   }
 
   void  print() const
   {
     printf("\"");
 
-      for(int  i = 0;  i < length();  ++i)
+      for(auto&  c: *this)
       {
-        printf("%c",var.string->at(i));
+        printf("%c",c);
       }
 
 
-    printf("\"\n");
+    printf("\"");
   }
 
 };

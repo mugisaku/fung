@@ -7,34 +7,38 @@
 using namespace fung;
 
 
+template<typename  T>
+void
+remove(T&  ptr)
+{
+  delete ptr          ;
+         ptr = nullptr;
+}
+
+
 int
 main(int  argc, char**  argv)
 {
-  auto  s = new Branch<char>("abc");
+  auto  b  = new Branch<char>("abc");
+  auto  bx = new Branch<char>(*b);
 
   {
-    auto  b0 = s->bud();
+    auto  b0 = b->bud();
 
     {
-      auto  b1 = s->bud();
+      auto  b1 = b->bud();
 
-//delete s;
-        if(b1.test())
-        {
-          b1.branch().print();
-        }
+remove(b);
+remove(bx);
     }
 
 
-//delete s;
-      if(b0.test())
-      {
-        b0.branch().print();
-      }
+//remove(b);
   }
 
 
-delete s;
+remove(b);
+remove(bx);
 
   return 0;
 }

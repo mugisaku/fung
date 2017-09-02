@@ -153,7 +153,7 @@ isexpr(char  c)
 }
 
 
-ValueList  to_value_list(ExpressionList const&  ls, Context&  ctx);
+List  to_list(ExpressionList const&  ls, Context&  ctx);
 
 ExpressionList  read_expression_list(Cursor&  cur);
 

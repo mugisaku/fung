@@ -1,5 +1,4 @@
 #include"fung_branch.hpp"
-#include"fung_WeakReference.hpp"
 #include<cstdio>
 #include<string>
 #include<ctime>
@@ -44,11 +43,11 @@ main(int  argc, char**  argv)
 
   print("s1",s1);
 
-  Branch<char>  s2 = process(s1,4);
+  Branch<char>  s2(s0+"Potato");
 
   print("s2",s2);
 
-  Branch<char>  s3(s1+"ghi");
+  Branch<char>  s3 = process(s1,4);
 
   print("s3",s3);
 

@@ -39,7 +39,7 @@ public:
 
 
   Value  operator()(std::string const&  name, Context&  ctx, std::initializer_list<Value>  args={}) const;
-  Value  operator()(std::string const&  name, Context&  ctx, ValueList const&  args) const;
+  Value  operator()(std::string const&  name, Context&  ctx, List const&  args) const;
 
   ParameterList const&  get_parameter_list() const{return parameter_list;}
 

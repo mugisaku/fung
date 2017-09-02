@@ -203,7 +203,7 @@ evaluate(Context&  ctx, bool  b) const
       return ctx[data.identifier.string];
       break;
   case(ExpressionKind::list):
-      return Value(to_value_list(data.list,ctx));
+      return Value(to_list(data.list,ctx));
       break;
     }
 
@@ -214,18 +214,18 @@ evaluate(Context&  ctx, bool  b) const
 
 
 
-ValueList
-read_list(ValueList  ls, ExpressionList::const_iterator  it, ExpressionList::const_iterator  end, Context&  ctx)
+List
+read_list(List  ls, ExpressionList::const_iterator  it, ExpressionList::const_iterator  end, Context&  ctx)
 {
   return(it != end)? read_list(ls+it->evaluate(ctx),it+1,end,ctx):ls;
 }
 
 
-ValueList
-to_value_list(ExpressionList const&  ls, Context&  ctx)
+List
+to_list(ExpressionList const&  ls, Context&  ctx)
 {
 
-  return read_list(ValueList(),ls.cbegin(),ls.cend(),ctx);
+  return read_list(List(),ls.cbegin(),ls.cend(),ctx);
 }
 
 

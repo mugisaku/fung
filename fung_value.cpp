@@ -17,10 +17,10 @@ Value  const undefined(ValueKind::undefined);
 Value::Value(int  i): kind(ValueKind::integer){data.integer = i;}
 Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
 Value::Value(Function const&  fn): kind(ValueKind::function){data.function = &fn;}
-Value::Value(std::string const&  s): kind(ValueKind::string){new(&data) SharedString<char>(s.data(),s.size());}
-Value::Value(SharedString<char>&&  s): kind(ValueKind::string){new(&data) SharedString<char>(std::move(s));}
+Value::Value(std::string const&  s): kind(ValueKind::string){new(&data) String(s.data(),s.size());}
+Value::Value(String&&  s): kind(ValueKind::string){new(&data) String(std::move(s));}
 Value::Value(Value*  v): kind(ValueKind::any){data.value = v;}
-Value::Value(ValueList&&  ls): kind(ValueKind::list){new(&data) ValueList(std::move(ls));}
+Value::Value(List&&  ls): kind(ValueKind::list){new(&data) List(std::move(ls));}
 
 
 
@@ -46,13 +46,13 @@ operator=(Value const&  rhs) noexcept
       data.integer = rhs.data.integer;
       break;
   case(ValueKind::string):
-      new(&data) SharedString<char>(rhs.data.string);
+      new(&data) String(rhs.data.string);
       break;
   case(ValueKind::any):
       data.value = new Value(*rhs.data.value);
       break;
   case(ValueKind::list):
-      new(&data) ValueList(rhs.data.list);
+      new(&data) List(rhs.data.list);
       break;
   case(ValueKind::function):
       data.function = rhs.data.function;
@@ -85,13 +85,13 @@ operator=(Value&&  rhs) noexcept
       data.integer = rhs.data.integer;
       break;
   case(ValueKind::string):
-      new(&data) SharedString<char>(std::move(rhs.data.string));
+      new(&data) String(std::move(rhs.data.string));
       break;
   case(ValueKind::any):
       data.value = rhs.data.value;
       break;
   case(ValueKind::list):
-      new(&data) ValueList(std::move(rhs.data.list));
+      new(&data) List(std::move(rhs.data.list));
       break;
   case(ValueKind::function):
       data.function = rhs.data.function;
@@ -119,13 +119,13 @@ clear()
   case(ValueKind::function):
       break;
   case(ValueKind::string):
-      data.string.~SharedString();
+      data.string.~Branch();
       break;
   case(ValueKind::any):
       delete data.value;
       break;
   case(ValueKind::list):
-      data.list.~SharedString();
+      data.list.~Branch();
       break;
     }
 

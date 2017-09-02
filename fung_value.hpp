@@ -3,7 +3,6 @@
 
 
 #include"fung_ValueKind.hpp"
-#include"fung_SharedString.hpp"
 #include"fung_pointer.hpp"
 #include<vector>
 #include<string>
@@ -17,19 +16,16 @@ class Function;
 class Value;
 
 
-using ValueList = SharedString<Value>;
-
-
 union
 ValueData
 {
-  int                 integer;
-  bool                boolean;
-  SharedString<char>   string;
+  int     integer;
+  bool    boolean;
+  String   string;
 
   Value*  value;
 
-  ValueList  list;
+  List  list;
 
   Function const*  function;
 
@@ -52,9 +48,9 @@ public:
    explicit Value(int  i);
    explicit Value(bool  b);
    explicit Value(std::string const&  s);
-   explicit Value(SharedString<char>&&  s);
+   explicit Value(String&&  s);
    explicit Value(Value*  v);
-   explicit Value(ValueList&&  ls);
+   explicit Value(List&&  ls);
    explicit Value(Function const&  fn);
    Value(Value const&  rhs) noexcept{*this = rhs;}
    Value(Value&&       rhs) noexcept{*this = std::move(rhs);}

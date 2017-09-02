@@ -12,7 +12,7 @@ Value
 Function::
 operator()(std::string const&  name, Context&  ctx, std::initializer_list<Value>  args) const
 {
-  ValueList  buf = args;
+  List  buf = args;
 
   return (*this)(name,ctx,buf);
 }
@@ -20,7 +20,7 @@ operator()(std::string const&  name, Context&  ctx, std::initializer_list<Value>
 
 Value
 Function::
-operator()(std::string const&  name, Context&  ctx, ValueList const&  args) const
+operator()(std::string const&  name, Context&  ctx, List const&  args) const
 {
     if(parameter_list.size() != args.length())
     {

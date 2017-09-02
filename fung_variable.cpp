@@ -86,7 +86,7 @@ get_value(std::unique_ptr<GlobalSpace> const&  gsp)
           break;
       case(ValueKind::list):
           {
-            value = Value(to_value_list(expression_list,ctx));
+            value = Value(to_list(expression_list,ctx));
           }
           break;
       case(ValueKind::any):
