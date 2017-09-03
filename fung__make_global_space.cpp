@@ -38,6 +38,20 @@ read_statement(Cursor&  cur, std::string const&  fn_name)
         }
 
       else
+        if(id == "print")
+        {
+          ExpressionMaker  mk;
+
+          char  buf[256];
+
+          snprintf(buf,sizeof(buf),"関数%s内print文:",fn_name.data());
+
+          PrintStatement  prn(mk(cur,buf));
+
+          stmt = Statement(std::move(prn));
+        }
+
+      else
         if(id == "interrupt")
         {
           stmt = Statement(InterruptStatement());

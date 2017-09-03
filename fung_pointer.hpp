@@ -48,8 +48,8 @@ Pointer
 
 public:
   Pointer(){}
-  Pointer(String const&  s);
-  Pointer(List const&  ls);
+  Pointer(String const&  s, size_t  i=0);
+  Pointer(List const&   ls, size_t  i=0);
   Pointer(Pointer const&  rhs) noexcept{*this = rhs;}
   Pointer(Pointer&&  rhs) noexcept{*this = std::move(rhs);}
  ~Pointer(){clear();}
@@ -65,7 +65,8 @@ public:
 
   PointerKind  get_kind() const{return kind;}
 
-  void    set_index(size_t  i){index = i;}
+  Pointer  operator+(size_t  i) const;
+
   size_t  get_index() const{return index;}
 
   void  print() const;

@@ -1,4 +1,5 @@
 #include"fung_value.hpp"
+#include"fung_error.hpp"
 #include"fung_function.hpp"
 
 
@@ -11,6 +12,15 @@ namespace fung{
 
 namespace{
 Value
+add_p(Value const&  lhs, Value const&  rhs)
+{
+  auto  v = rhs.convert_to_integer();
+
+  return (v == ValueKind::integer)? Value(lhs->pointer+v->integer):undefined;
+}
+
+
+Value
 add_i(Value const&  lhs, Value const&  rhs)
 {
   auto  v = rhs.convert_to_integer();
@@ -22,9 +32,9 @@ add_i(Value const&  lhs, Value const&  rhs)
 Value
 add_s(Value const&  lhs, Value const&  rhs)
 {
-  auto  v = rhs.convert_to_string();
-
-  return (v == ValueKind::string)? Value(lhs->string+v->string):undefined;
+  return (rhs == ValueKind::integer)? Value(lhs->string+rhs->integer):
+         (rhs == ValueKind::string )? Value(lhs->string+rhs->string ):
+           undefined;
 }
 }
 
@@ -34,6 +44,7 @@ Value::
 add(Value const&  lhs, Value const&  rhs)
 {
   return (lhs == ValueKind::integer)? add_i(lhs,rhs):
+         (lhs == ValueKind::pointer)? add_p(lhs,rhs):
          (lhs == ValueKind::string )? add_s(lhs,rhs):
          (lhs == ValueKind::list   )? Value(lhs->list+rhs):
            undefined;
@@ -210,9 +221,9 @@ Value  Value::    neg(Value const&  lhs){return(lhs == ValueKind::integer)? Valu
 
 template<typename  T>
 Value
-dereference(T&  t)
+dereference(T&  t, size_t  i)
 {
-  return t.test()? Value(t.branch()):undefined;
+  return t.test()? Value(t.branch().at(i)):undefined;
 }
 
 
@@ -224,8 +235,14 @@ der(Value const&  lhs)
     {
       auto&  ptr = lhs->pointer;
 
-           if(ptr == PointerKind::string){return dereference(lhs->pointer->string_bud);}
-      else if(ptr == PointerKind::list  ){return dereference(lhs->pointer->list_bud  );}
+           if(ptr == PointerKind::string){return dereference(ptr->string_bud,ptr.get_index());}
+      else if(ptr == PointerKind::list  ){return dereference(ptr->list_bud  ,ptr.get_index());}
+      else if(ptr == PointerKind::null  ){throw Error("NULLPTRを参照した");}
+    }
+
+  else
+    {
+      throw Error("ポインタでないものを参照した");
     }
 
 

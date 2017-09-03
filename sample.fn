@@ -67,21 +67,23 @@ isident0(integer  c)->boolean
 function
 isidentn(integer  c)->boolean
 {
+  print c;
+
   return(isalnum(c) || (c == '_'));
 }
 
 
 function
-read_identifier(pointer  p)->list
+read_identifier(pointer  p, string  s)->list
 {
-  return list(*p);
+  return isidentn(*p)? read_identifier(p+1,s+*p):list(p,s);
 }
 
 
 function
 main()->list
 {
-  return read_identifier("abcd".pointer);
+  return read_identifier("abcdefg".pointer,"");
 }
 
 

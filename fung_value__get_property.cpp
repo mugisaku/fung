@@ -27,7 +27,7 @@ get_property(std::string const&  name) const
   case(ValueKind::function):
       break;
   case(ValueKind::string):
-           if(name == "length"){return Value(static_cast<int>(data.string.length()));}
+           if(name ==  "length"){return Value(static_cast<int>(data.string.length()));}
       else if(name == "pointer"){return Value(Pointer(data.string));}
       break;
   case(ValueKind::list):

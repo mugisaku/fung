@@ -1,4 +1,6 @@
 #include"fung_pointer.hpp"
+#include"fung_value.hpp"
+#include"fung_error.hpp"
 
 
 
@@ -8,8 +10,8 @@ namespace fung{
 
 
 
-Pointer::Pointer(String const&  s): kind(PointerKind::string){new(&data) String::Bud(s.bud());}
-Pointer::Pointer(List const&  ls): kind(PointerKind::list){new(&data) List::Bud(ls.bud());}
+Pointer::Pointer(String const&  s, size_t  i): kind(PointerKind::string), index(i){new(&data) String::Bud(s.bud());}
+Pointer::Pointer(List const&   ls, size_t  i): kind(PointerKind::list  ), index(i){new(&data) List::Bud(ls.bud());}
 
 
 
@@ -20,7 +22,8 @@ operator=(Pointer const&  rhs) noexcept
 {
   clear();
 
-  kind = rhs.kind;
+  kind  = rhs.kind;
+  index = rhs.index;
 
     switch(kind)
     {
@@ -46,6 +49,8 @@ operator=(Pointer&&  rhs) noexcept
   clear();
 
   std::swap(kind,rhs.kind);
+
+  index = rhs.index;
 
     switch(kind)
     {
@@ -84,6 +89,29 @@ clear()
 
 
   kind = PointerKind::null;
+}
+
+
+Pointer
+Pointer::
+operator+(size_t  i) const
+{
+    switch(kind)
+    {
+  case(PointerKind::null):
+      return Pointer();
+      break;
+  case(PointerKind::string):
+      return Pointer(data.string_bud.branch(),index+i);
+      break;
+  case(PointerKind::list):
+      return Pointer(data.list_bud.branch(),index+i);
+      break;
+    }
+
+
+throw Error("不明なポインタ");
+  return Pointer();
 }
 
 

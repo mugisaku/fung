@@ -159,7 +159,9 @@ public:
   T const&  front() const{return *(var.pointer             );}
   T const&   back() const{return *(var.pointer+var.length-1);}
 
+  T      &  operator[](size_t  i)      {return var.pointer[i];}
   T const&  operator[](size_t  i) const{return var.pointer[i];}
+  T      &  at(size_t  i)      {return var.pointer[i];}
   T const&  at(size_t  i) const{return var.pointer[i];}
 
   size_t    length() const{return var.length;}

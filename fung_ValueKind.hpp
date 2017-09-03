@@ -22,6 +22,7 @@ ValueKind
   boolean,
   integer,
   function,
+  character,
   string,
   list,
   pointer,

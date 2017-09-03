@@ -24,7 +24,7 @@ operator()(std::string const&  name, Context&  ctx, List const&  args) const
 {
     if(parameter_list.size() != args.length())
     {
-      throw Error("引数の数が一致しない");
+      throw Error("%s 引数の数が一致しない",name.data());
     }
 
 
@@ -36,7 +36,10 @@ operator()(std::string const&  name, Context&  ctx, List const&  args) const
     {
         if(para.get_value_kind() != it->get_kind())
         {
-          throw Error("引数の型が一致しない");
+          auto&  a = Value::to_string(para.get_value_kind());
+          auto&  b = Value::to_string(it->get_kind());
+
+          throw Error("%s %s <- %s 引数の型が一致しない",name.data(),a.data(),b.data());
         }
 
 

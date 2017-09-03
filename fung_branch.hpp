@@ -289,6 +289,8 @@ public:
   size_t      use_count() const{return var.link->reference_count();}
   size_t  observe_count() const{return var.link->weak_reference_count();}
 
+  T const&  at(size_t  i) const{return string().at(i);}
+
   T const*  data() const{return string().data();}
 
   T const&  back() const{return string().back();}
