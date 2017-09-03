@@ -3,7 +3,8 @@
 
 
 #include<string>
-#include"fung_expression.hpp"
+#include<vector>
+#include"fung_Expression.hpp"
 
 
 namespace fung{
@@ -34,7 +35,9 @@ LetStatement
 
   Expression  expression;
 
-  LetStatement(std::string&&  id, Expression&&  expr): identifier(std::move(id)), expression(std::move(expr)){}
+  LetStatement(std::string&&  id, Expression&&  expr):
+  identifier(std::move(id)),
+  expression(std::move(expr)){}
 
 };
 
@@ -44,7 +47,8 @@ PrintStatement
 {
   Expression  expression;
 
-  PrintStatement(Expression&&  expr): expression(std::move(expr)){}
+  PrintStatement(Expression&&  expr):
+  expression(std::move(expr)){}
 
 };
 
@@ -54,7 +58,8 @@ ReturnStatement
 {
   Expression  expression;
 
-  ReturnStatement(Expression&&  expr): expression(std::move(expr)){}
+  ReturnStatement(Expression&&  expr):
+  expression(std::move(expr)){}
 
 };
 
@@ -68,7 +73,8 @@ Statement
   StatementKind  kind=StatementKind::null;
 
   std::string  identifier;
-  Expression   expression;
+
+  Expression  expression;
 
 public:
   Statement(){}
@@ -83,7 +89,7 @@ public:
   Statement&  operator=(Statement const&  rhs) noexcept;
   Statement&  operator=(Statement&&       rhs) noexcept;
 
-  Expression const*  operator->() const{return &expression;}
+  ExpressionNode const*  operator->() const{return &*expression;}
 
   operator bool() const{return kind != StatementKind::null;}
 
@@ -97,6 +103,9 @@ public:
   void  print() const;
 
 };
+
+
+using StatementList = std::vector<Statement>;
 
 
 }

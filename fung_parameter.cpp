@@ -16,7 +16,7 @@ print() const
     {
       printf(" = ");
 
-      expression.print();
+      expression->print();
     }
 }
 

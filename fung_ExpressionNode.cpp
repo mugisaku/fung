@@ -1,4 +1,4 @@
-#include"fung_expression.hpp"
+#include"fung_ExpressionNode.hpp"
 #include"fung_function.hpp"
 #include"fung_cursor.hpp"
 #include"fung_variable.hpp"
@@ -12,35 +12,36 @@ namespace fung{
 
 
 
-Expression::
-Expression(Identifier&&  id):
-kind(ExpressionKind::identifier)
+ExpressionNode::
+ExpressionNode(Identifier&&  id):
+kind(ExpressionNodeKind::identifier)
 {
   new(&data) Identifier(std::move(id));
 }
 
 
-Expression::
-Expression(Value&&  v):
-kind(ExpressionKind::value)
+ExpressionNode::
+ExpressionNode(Value&&  v):
+kind(ExpressionNodeKind::value)
 {
   new(&data) Value(std::move(v));
 }
 
 
-Expression::
-Expression(ExpressionList&&  ls):
-kind(ExpressionKind::list)
+ExpressionNode::
+ExpressionNode(ExpressionList&&  ls):
+kind(ExpressionNodeKind::list)
 {
   new(&data) ExpressionList(std::move(ls));
 }
 
 
-Expression::
-Expression(Mnemonic  mn, Expression*  l, Expression*  r):
-kind(l? ExpressionKind::operation:ExpressionKind::operator_),
-left(l),
-right(r)
+ExpressionNode::
+ExpressionNode(Mnemonic  mn, Expression&&  l, Expression&&  r):
+kind(l? ExpressionNodeKind::operation
+      : ExpressionNodeKind::operator_),
+left(std::move(l)),
+right(std::move(r))
 {
   data.mnemonic = mn;
 }
@@ -48,9 +49,9 @@ right(r)
 
 
 
-Expression&
-Expression::
-operator=(Expression const&  rhs) noexcept
+ExpressionNode&
+ExpressionNode::
+operator=(ExpressionNode const&  rhs) noexcept
 {
   clear();
 
@@ -58,34 +59,34 @@ operator=(Expression const&  rhs) noexcept
 
     switch(kind)
     {
-  case(ExpressionKind::null):
+  case(ExpressionNodeKind::null):
       break;
-  case(ExpressionKind::operator_):
-  case(ExpressionKind::operation):
+  case(ExpressionNodeKind::operator_):
+  case(ExpressionNodeKind::operation):
       data.mnemonic = rhs.data.mnemonic;
       break;
-  case(ExpressionKind::value):
+  case(ExpressionNodeKind::value):
       new(&data) Value(rhs.data.value);
       break;
-  case(ExpressionKind::identifier):
+  case(ExpressionNodeKind::identifier):
       new(&data) Identifier(rhs.data.identifier);
       break;
-  case(ExpressionKind::list):
+  case(ExpressionNodeKind::list):
       new(&data) ExpressionList(rhs.data.list);
       break;
     }
 
 
-  left  = rhs.left ? new Expression(*rhs.left ):nullptr;
-  right = rhs.right? new Expression(*rhs.right):nullptr;
+  left  = rhs.left ;
+  right = rhs.right;
 
   return *this;
 }
 
 
-Expression&
-Expression::
-operator=(Expression&&  rhs) noexcept
+ExpressionNode&
+ExpressionNode::
+operator=(ExpressionNode&&  rhs) noexcept
 {
   clear();
 
@@ -93,26 +94,26 @@ operator=(Expression&&  rhs) noexcept
 
     switch(kind)
     {
-  case(ExpressionKind::null):
+  case(ExpressionNodeKind::null):
       break;
-  case(ExpressionKind::operator_):
-  case(ExpressionKind::operation):
+  case(ExpressionNodeKind::operator_):
+  case(ExpressionNodeKind::operation):
       data.mnemonic = rhs.data.mnemonic;
       break;
-  case(ExpressionKind::value):
+  case(ExpressionNodeKind::value):
       new(&data) Value(std::move(rhs.data.value));
       break;
-  case(ExpressionKind::identifier):
+  case(ExpressionNodeKind::identifier):
       new(&data) Identifier(std::move(rhs.data.identifier));
       break;
-  case(ExpressionKind::list):
+  case(ExpressionNodeKind::list):
       new(&data) ExpressionList(std::move(rhs.data.list));
       break;
     }
 
 
-  std::swap(left ,rhs.left );
-  std::swap(right,rhs.right);
+  left  = std::move(rhs.left );
+  right = std::move(rhs.right);
 
   return *this;
 }
@@ -121,39 +122,36 @@ operator=(Expression&&  rhs) noexcept
 
 
 void
-Expression::
+ExpressionNode::
 clear()
 {
     switch(kind)
     {
-  case(ExpressionKind::null):
-  case(ExpressionKind::operator_):
-  case(ExpressionKind::operation):
+  case(ExpressionNodeKind::null):
+  case(ExpressionNodeKind::operator_):
+  case(ExpressionNodeKind::operation):
       break;
-  case(ExpressionKind::value):
+  case(ExpressionNodeKind::value):
       data.value.~Value();
       break;
-  case(ExpressionKind::identifier):
+  case(ExpressionNodeKind::identifier):
       data.identifier.~Identifier();
       break;
-  case(ExpressionKind::list):
+  case(ExpressionNodeKind::list):
       data.list.~vector();
       break;
     }
 
 
-  delete left          ;
-         left = nullptr;
+   left.reset();
+  right.reset();
 
-  delete right          ;
-         right = nullptr;
-
-  kind = ExpressionKind::null;
+  kind = ExpressionNodeKind::null;
 }
 
 
 bool
-Expression::
+ExpressionNode::
 is_unary_operator() const
 {
   auto&  mn = data.mnemonic;
@@ -166,7 +164,7 @@ is_unary_operator() const
 
 
 bool
-Expression::
+ExpressionNode::
 is_binary_operator() const
 {
   auto&  mn = data.mnemonic;
@@ -199,28 +197,28 @@ is_binary_operator() const
 
 
 bool
-Expression::
+ExpressionNode::
 is_operand() const
 {
-  return((kind == ExpressionKind::operation ) ||
-         (kind == ExpressionKind::value     ) ||
-         (kind == ExpressionKind::identifier));
+  return((kind == ExpressionNodeKind::operation ) ||
+         (kind == ExpressionNodeKind::value     ) ||
+         (kind == ExpressionNodeKind::identifier));
 }
 
 
 void
-Expression::
+ExpressionNode::
 print() const
 {
     switch(kind)
     {
-  case(ExpressionKind::null):
+  case(ExpressionNodeKind::null):
       printf("NULL ");
       break;
-  case(ExpressionKind::operator_):
+  case(ExpressionNodeKind::operator_):
       print_mnemonic(data.mnemonic);
       break;
-  case(ExpressionKind::operation):
+  case(ExpressionNodeKind::operation):
         if(is_unary_operator())
         {
           print_mnemonic(data.mnemonic);
@@ -241,13 +239,13 @@ print() const
           printf(")");
         }
       break;
-  case(ExpressionKind::value):
+  case(ExpressionNodeKind::value):
       data.value.print();
       break;
-  case(ExpressionKind::identifier):
+  case(ExpressionNodeKind::identifier):
       printf("%s",data.identifier->data());
       break;
-  case(ExpressionKind::list):
+  case(ExpressionNodeKind::list):
       printf("(");
 
         {
@@ -256,13 +254,13 @@ print() const
 
             if(it != end)
             {
-              it++->print();
+              (*it++)->print();
 
                 while(it != end)
                 {
                   printf(",");
 
-                  it++->print();
+                  (*it++)->print();
                 }
             }
         }
@@ -274,7 +272,7 @@ print() const
 
 
 void
-Expression::
+ExpressionNode::
 print_mnemonic(Mnemonic  mn)
 {
   char const*  s = "";

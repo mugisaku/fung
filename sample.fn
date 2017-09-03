@@ -67,8 +67,6 @@ isident0(integer  c)->boolean
 function
 isidentn(integer  c)->boolean
 {
-  print c;
-
   return(isalnum(c) || (c == '_'));
 }
 
@@ -81,9 +79,32 @@ read_identifier(pointer  p, string  s)->list
 
 
 function
-main()->list
+isspace(integer  c)->boolean
 {
-  return read_identifier("abcdefg".pointer,"");
+  return((c ==  ' ') ||
+         (c == '\t') ||
+         (c == '\n'));
+}
+
+
+function
+skip_spaces(pointer  p)->pointer
+{
+  return isspace(*p)? skip_spaces(p+1):p;
+}
+
+
+function
+read_token(pointer  p, list  ls)->list
+{
+  return isspace(*p)? skip_spaces(p+1):p;
+}
+
+
+function
+main(string  s)->string
+{
+  return s;
 }
 
 

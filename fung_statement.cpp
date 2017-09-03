@@ -1,4 +1,5 @@
 #include"fung_statement.hpp"
+#include"fung_Expression.hpp"
 #include"fung_function.hpp"
 #include"fung_context.hpp"
 
@@ -95,6 +96,8 @@ clear()
 */
 
 
+  expression.reset();
+
   kind = StatementKind::null;
 }
 
@@ -115,11 +118,11 @@ execute(Context&  ctx) const
   case(StatementKind::print):
       printf("[print stmt] ");
 
-      expression.print();
+      expression->print();
 
       printf(" -> ");
 
-      expression.evaluate(ctx).print();
+      expression->evaluate(ctx).print();
 
       printf("\n");
       break;
@@ -127,7 +130,7 @@ execute(Context&  ctx) const
       ctx.entry(identifier,expression);
       break;
   case(StatementKind::return_):
-      ctx.hold_returned_value(expression.evaluate(ctx));
+      ctx.hold_returned_value(expression->evaluate(ctx));
 
       return false;
       break;
@@ -155,16 +158,16 @@ print() const
   case(StatementKind::print):
       printf("print  ");
 
-      expression.print();
+      expression->print();
       break;
   case(StatementKind::let):
       printf("let  %s = ",identifier.data());
 
-      expression.print();
+      expression->print();
       break;
   case(StatementKind::return_):
       printf("return ");
-      expression.print();
+      expression->print();
       break;
     }
 

@@ -13,7 +13,7 @@ namespace fung{
 
 bool
 Context::
-prepare_to_run(std::string const&  function_name)
+prepare_to_run(std::string const&  function_name, List const&  args)
 {
   frame_stack.clear();
 
@@ -25,7 +25,12 @@ prepare_to_run(std::string const&  function_name)
         {
           returned_value = undefined;
 
-          enter(function_name,*c->value->function);
+
+          auto&  fn = *c->value->function;
+
+          enter(function_name,fn);
+
+          entry(fn.get_parameter_list(),args);
 
           return true;
         }
@@ -106,7 +111,7 @@ void
 Context::
 entry(std::string const&  name, Expression const&  expr)
 {
-  frame_stack.back().append_variable(Variable(name,expr.evaluate(*this)));
+  frame_stack.back().append_variable(Variable(name,expr->evaluate(*this)));
 }
 
 
@@ -116,6 +121,40 @@ entry(std::string const&  name, Value const&  val)
 {
   frame_stack.back().append_variable(Variable(name,val));
 }
+
+
+void
+Context::
+entry(ParameterList const&  parals, List const&  ls)
+{
+  auto&  frm = frame_stack.back();
+
+  auto&  fn_name = frm.get_function_name();
+
+    if(parals.size() != ls.length())
+    {
+      throw Error("%s 引数の数が一致しない",fn_name.data());
+    }
+
+
+  auto  it = ls.cbegin();
+
+    for(auto&  para: parals)
+    {
+        if(para.get_value_kind() != it->get_kind())
+        {
+          auto&  a = Value::to_string(para.get_value_kind());
+          auto&  b = Value::to_string(it->get_kind());
+
+          throw Error("%s %s <- %s 引数の型が一致しない",fn_name.data(),a.data(),b.data());
+        }
+
+
+      entry(para.get_name(),*it++);
+    }
+}
+
+
 
 
 Value

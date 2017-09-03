@@ -57,7 +57,7 @@ get_value(std::unique_ptr<GlobalSpace> const&  gsp)
               }
 
 
-            value = expression_list.back().evaluate(ctx).convert_to_boolean();
+            value = expression_list.back()->evaluate(ctx).convert_to_boolean();
           }
           break;
       case(ValueKind::integer):
@@ -68,7 +68,7 @@ get_value(std::unique_ptr<GlobalSpace> const&  gsp)
               }
 
 
-            value = expression_list.back().evaluate(ctx).convert_to_integer();
+            value = expression_list.back()->evaluate(ctx).convert_to_integer();
           }
           break;
       case(ValueKind::function):
@@ -81,7 +81,7 @@ get_value(std::unique_ptr<GlobalSpace> const&  gsp)
               }
 
 
-            value = expression_list.back().evaluate(ctx).convert_to_string();
+            value = expression_list.back()->evaluate(ctx).convert_to_string();
           }
           break;
       case(ValueKind::list):
@@ -119,13 +119,13 @@ print() const
 
         if(i != e)
         {
-          i++->print();
+          (*i++)->print();
 
             while(i != e)
             {
               printf(",");
 
-              i++->print();
+              (*i++)->print();
             }
         }
 

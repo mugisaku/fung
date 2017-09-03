@@ -31,7 +31,7 @@ public:
 
   std::vector<ExecutionFrame> const*  operator->() const{return &frame_stack;}
 
-  bool  prepare_to_run(std::string const&  function_name);
+  bool  prepare_to_run(std::string const&  function_name, List const&  args);
   bool  run();
 
   void  enter(std::string const&  fn_name, Function const&  fn);
@@ -39,6 +39,8 @@ public:
 
   void  entry(std::string const&  name, Expression const&  expr);
   void  entry(std::string const&  name, Value const&  val);
+
+  void  entry(ParameterList const&  parals, List const&  ls);
 
   void  hold_returned_value(Value  value){returned_value = value;}
 

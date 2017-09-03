@@ -1,9 +1,11 @@
-#ifndef FUNG_Expression_HPP_INCLUDED
-#define FUNG_Expression_HPP_INCLUDED
+#ifndef FUNG_ExpressionNode_HPP_INCLUDED
+#define FUNG_ExpressionNode_HPP_INCLUDED
 
 
 #include"fung_value.hpp"
 #include"fung_identifier.hpp"
+#include"fung_statement.hpp"
+#include"fung_Expression.hpp"
 #include<vector>
 
 
@@ -11,7 +13,7 @@ namespace fung{
 
 
 class Context;
-class Expression;
+class ExpressionNode;
 
 using ExpressionList = std::vector<Expression>;
 
@@ -53,7 +55,7 @@ Mnemonic
 
 
 enum class
-ExpressionKind
+ExpressionNodeKind
 {
   null,
 
@@ -63,6 +65,7 @@ ExpressionKind
 
   value,
   identifier,
+  statement_list,
 
   list,
  
@@ -70,7 +73,7 @@ ExpressionKind
 
 
 union
-ExpressionData
+ExpressionNodeData
 {
   Mnemonic      mnemonic;
   Value            value;
@@ -78,47 +81,48 @@ ExpressionData
 
   ExpressionList  list;
 
-  ExpressionData(){}
- ~ExpressionData(){}
+  ExpressionNodeData(){}
+ ~ExpressionNodeData(){}
 
 };
 
 
 class
-Expression
+ExpressionNode
 {
-  ExpressionKind  kind=ExpressionKind::null;
-  ExpressionData  data;
+  ExpressionNodeKind  kind=ExpressionNodeKind::null;
+  ExpressionNodeData  data;
 
-  Expression*   left=nullptr;
-  Expression*  right=nullptr;
+  Expression   left;
+  Expression  right;
 
   Value  operate(Context&  ctx, bool  b) const;
 
 public:
-  Expression(){}
-  explicit Expression(ExpressionKind  k): kind(k){}
-  explicit Expression(Identifier&&  id);
-  explicit Expression(Value&&  v);
-  explicit Expression(ExpressionList&&  ls);
-  Expression(Mnemonic  mn, Expression*  l=nullptr, Expression*  r=nullptr);
-  Expression(Expression const&  rhs) noexcept{*this = rhs;}
-  Expression(Expression&&       rhs) noexcept{*this = std::move(rhs);}
- ~Expression(){clear();}
+  ExpressionNode(){}
+  explicit ExpressionNode(ExpressionNodeKind  k): kind(k){}
+  explicit ExpressionNode(Identifier&&  id);
+  explicit ExpressionNode(Value&&  v);
+  explicit ExpressionNode(ExpressionList&&  ls);
+  ExpressionNode(Mnemonic  mn, Expression&&  l=Expression(),
+                               Expression&&  r=Expression());
+  ExpressionNode(ExpressionNode const&  rhs) noexcept{*this = rhs;}
+  ExpressionNode(ExpressionNode&&       rhs) noexcept{*this = std::move(rhs);}
+ ~ExpressionNode(){clear();}
 
-  Expression&  operator=(Expression const&  rhs) noexcept;
-  Expression&  operator=(Expression&&       rhs) noexcept;
+  ExpressionNode&  operator=(ExpressionNode const&  rhs) noexcept;
+  ExpressionNode&  operator=(ExpressionNode&&       rhs) noexcept;
 
-  bool  operator==(ExpressionKind  k) const{return kind == k;}
-  bool  operator!=(ExpressionKind  k) const{return kind != k;}
+  bool  operator==(ExpressionNodeKind  k) const{return kind == k;}
+  bool  operator!=(ExpressionNodeKind  k) const{return kind != k;}
 
-  operator bool() const{return kind != ExpressionKind::null;}
+  operator bool() const{return kind != ExpressionNodeKind::null;}
 
-  ExpressionData const*  operator->() const{return &data;}
+  ExpressionNodeData const*  operator->() const{return &data;}
 
   void  clear();
 
-  ExpressionKind  get_kind() const{return kind;}
+  ExpressionNodeKind  get_kind() const{return kind;}
 
   bool   is_unary_operator() const;
   bool  is_binary_operator() const;

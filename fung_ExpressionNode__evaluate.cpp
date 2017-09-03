@@ -1,4 +1,4 @@
-#include"fung_expression.hpp"
+#include"fung_ExpressionNode.hpp"
 #include"fung_function.hpp"
 #include"fung_error.hpp"
 #include"fung_context.hpp"
@@ -12,7 +12,7 @@ namespace fung{
 
 
 Value
-Expression::
+ExpressionNode::
 operate(Context&  ctx, bool  b) const
 {
   auto&  mnemonic = data.mnemonic;
@@ -108,7 +108,7 @@ operate(Context&  ctx, bool  b) const
         }
 
 
-      auto  flag = left->get_kind() == ExpressionKind::identifier;      
+      auto  flag = left->get_kind() == ExpressionNodeKind::identifier;      
 
       auto&  name = flag? (*left)->identifier.string:fn_name;
 
@@ -118,7 +118,7 @@ operate(Context&  ctx, bool  b) const
 
     if(mnemonic == Mnemonic::acc)
     {
-        if(right->get_kind() != ExpressionKind::identifier)
+        if(right->get_kind() != ExpressionNodeKind::identifier)
         {
           throw Error("メンバー呼び出しの右辺が識別子ではない");
         }
@@ -184,25 +184,25 @@ operate(Context&  ctx, bool  b) const
 
 
 Value
-Expression::
+ExpressionNode::
 evaluate(Context&  ctx, bool  b) const
 {
     switch(kind)
     {
-  case(ExpressionKind::null):
-  case(ExpressionKind::operator_):
+  case(ExpressionNodeKind::null):
+  case(ExpressionNodeKind::operator_):
       throw Error("未定義の値");
       break;
-  case(ExpressionKind::operation):
+  case(ExpressionNodeKind::operation):
       return operate(ctx,b);
       break;
-  case(ExpressionKind::value):
+  case(ExpressionNodeKind::value):
       return data.value;
       break;
-  case(ExpressionKind::identifier):
+  case(ExpressionNodeKind::identifier):
       return ctx[data.identifier.string];
       break;
-  case(ExpressionKind::list):
+  case(ExpressionNodeKind::list):
       return Value(to_list(data.list,ctx));
       break;
     }
@@ -217,7 +217,7 @@ evaluate(Context&  ctx, bool  b) const
 List
 read_list(List  ls, ExpressionList::const_iterator  it, ExpressionList::const_iterator  end, Context&  ctx)
 {
-  return(it != end)? read_list(ls+it->evaluate(ctx),it+1,end,ctx):ls;
+  return(it != end)? read_list(ls+(*it)->evaluate(ctx),it+1,end,ctx):ls;
 }
 
 

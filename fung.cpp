@@ -184,7 +184,9 @@ main(int  argc, char**  argv)
 
           Context  ctx(gsp);
 
-            if(ctx.prepare_to_run("main"))
+          List  args({Value(std::string(s))});
+
+            if(ctx.prepare_to_run("main",args))
             {
                 if(ctx.run())
                 {

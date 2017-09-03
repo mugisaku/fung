@@ -70,7 +70,7 @@ read_either_expression(Cursor&  cur)
 {
   ExpressionMaker  mk;
 
-  auto  l = new Expression(mk(cur,"条件演算の第一式"));
+  auto  l = mk(cur,"条件演算の第一式");
 
     if(!mk.get_last_operator().compare(':'))
     {
@@ -78,9 +78,9 @@ read_either_expression(Cursor&  cur)
     }
 
 
-  auto  r = new Expression(mk(cur,"条件演算の第二式"));
+  auto  r = mk(cur,"条件演算の第二式");
 
-  return Expression(Mnemonic::eth,l,r);
+  return Expression(ExpressionNode(Mnemonic::eth,std::move(l),std::move(r)));
 }
 
 
@@ -116,10 +116,10 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
         }
 
 
-      auto  l = new Expression(std::move(expr));
-      auto  r = new Expression(std::move(  ls));
+      auto  l = Expression(              (std::move(expr)));
+      auto  r = Expression(ExpressionNode(std::move(  ls)));
 
-      expr = Expression(Mnemonic::cal,l,r);
+      expr = Expression(ExpressionNode(Mnemonic::cal,std::move(l),std::move(r)));
 
       return read_postfix_expression(cur,std::move(expr));
     }
@@ -129,8 +129,8 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
     {
       cur += 1;
 
-      auto  l = new Expression(std::move(expr));
-      auto  r = new Expression(        mk(cur));
+      auto  l = Expression(std::move(expr));
+      auto  r = Expression(        mk(cur));
 
         if(!mk.get_last_operator().compare(']'))
         {
@@ -138,7 +138,7 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
         }
 
 
-      expr = Expression(Mnemonic::cal,l,r);
+      expr = Expression(ExpressionNode(Mnemonic::cal,std::move(l),std::move(r)));
 
       return read_postfix_expression(cur,std::move(expr));
     }
@@ -162,10 +162,10 @@ push_operand(Expression&&  expr)
       auto  c = unop_stack.back();
                 unop_stack.pop_back();
 
-      Expression  t(c == '-'? Mnemonic::neg    :
-                    c == '~'? Mnemonic::bit_not:
-                    c == '*'? Mnemonic::der:
-                    c == '!'? Mnemonic::log_not:Mnemonic::nop,new Expression(std::move(expr)));
+      Expression  t(ExpressionNode(c == '-'? Mnemonic::neg    :
+                                   c == '~'? Mnemonic::bit_not:
+                                   c == '*'? Mnemonic::der:
+                                   c == '!'? Mnemonic::log_not:Mnemonic::nop,std::move(expr)));
 
       expr = std::move(t);
     }
@@ -304,7 +304,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
   else
     if(tok == TokenKind::integer)
     {
-      Expression  expr(Value(static_cast<int>(tok->integer)));
+      Expression  expr(ExpressionNode(Value(static_cast<int>(tok->integer))));
 
       expr = read_postfix_expression(cur,std::move(expr));
 
@@ -314,7 +314,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
   else
     if(tok == TokenKind::string)
     {
-      Expression  expr(Value(std::move(tok->string)));
+      Expression  expr(ExpressionNode(Value(std::move(tok->string))));
 
       expr = read_postfix_expression(cur,std::move(expr));
 
@@ -326,8 +326,8 @@ step_first_phase(Cursor&  cur, Token&&  tok)
     {
       auto&  s = tok->string;
 
-           if(s == "true" ){push_operand(Expression(Value( true)));}
-      else if(s == "false"){push_operand(Expression(Value(false)));}
+           if(s == "true" ){push_operand(Expression(ExpressionNode(Value( true))));}
+      else if(s == "false"){push_operand(Expression(ExpressionNode(Value(false))));}
       else if(s == "list")
         {
           skip_spaces_and_newline(cur);
@@ -340,7 +340,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
 
           cur += 1;
 
-          auto  expr = Expression(read_expression_list(cur));
+          auto  expr = Expression(ExpressionNode(read_expression_list(cur)));
 
           expr = read_postfix_expression(cur,std::move(expr));
 
@@ -351,7 +351,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
         {
           Identifier  id(std::move(s));
 
-          Expression  expr(std::move(id));
+          Expression  expr(ExpressionNode(std::move(id)));
 
           expr = read_postfix_expression(cur,std::move(expr));
 
@@ -393,18 +393,18 @@ void
 ExpressionMaker::
 step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
 {
-    if((e == ExpressionKind::value     ) ||
-       (e == ExpressionKind::list      ) ||
-       (e == ExpressionKind::operation ) ||
-       (e == ExpressionKind::identifier))
+    if((*e == ExpressionNodeKind::value     ) ||
+       (*e == ExpressionNodeKind::list      ) ||
+       (*e == ExpressionNodeKind::operation ) ||
+       (*e == ExpressionNodeKind::identifier))
     {
       buf.emplace_back(std::move(e));
     }
 
   else
-    if(e == ExpressionKind::operator_)
+    if(*e == ExpressionNodeKind::operator_)
     {
-        if(e.is_binary_operator())
+        if(e->is_binary_operator())
         {
             if(buf.size() < 2)
             {
@@ -412,15 +412,15 @@ step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
             }
 
 
-          auto  r = new Expression(std::move(buf.back()));
+          auto  r = Expression(std::move(buf.back()));
 
           buf.pop_back();
 
-          auto  l = new Expression(std::move(buf.back()));
+          auto  l = Expression(std::move(buf.back()));
 
           buf.pop_back();
 
-          buf.emplace_back(e->mnemonic,l,r);
+          buf.emplace_back(ExpressionNode((*e)->mnemonic,std::move(l),std::move(r)));
         }
     }
 
@@ -448,7 +448,7 @@ run_last_phase(std::vector<Expression>&&  src)
     {
         for(auto&  e: buf)
         {
-          e.print();
+          e->print();
           printf("\n");
         }
 
@@ -459,7 +459,8 @@ run_last_phase(std::vector<Expression>&&  src)
     }
 
 
-  return buf.empty()? Expression():std::move(buf.front());
+  return buf.empty()? Expression()
+                    : std::move(buf.front());
 }
 
 

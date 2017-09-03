@@ -22,30 +22,9 @@ Value
 Function::
 operator()(std::string const&  name, Context&  ctx, List const&  args) const
 {
-    if(parameter_list.size() != args.length())
-    {
-      throw Error("%s 引数の数が一致しない",name.data());
-    }
-
-
   ctx.enter(name,*this);
 
-  auto  it = args.cbegin();
-
-    for(auto&  para: parameter_list)
-    {
-        if(para.get_value_kind() != it->get_kind())
-        {
-          auto&  a = Value::to_string(para.get_value_kind());
-          auto&  b = Value::to_string(it->get_kind());
-
-          throw Error("%s %s <- %s 引数の型が一致しない",name.data(),a.data(),b.data());
-        }
-
-
-      ctx.entry(para.get_name(),*it++);
-    }
-
+  ctx.entry(parameter_list,args);
 
     for(auto&  stmt: body)
     {

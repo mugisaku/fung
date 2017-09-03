@@ -2,10 +2,11 @@
 #define FUNG_ExpressionMaker_HPP_INCLUDED
 
 
-#include"fung_expression.hpp"
+#include"fung_ExpressionNode.hpp"
 #include"fung_cursor.hpp"
 #include"fung_TinyString.hpp"
 #include"fung_token.hpp"
+#include<memory>
 
 
 namespace fung{

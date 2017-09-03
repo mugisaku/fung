@@ -46,8 +46,9 @@ endif()
 
 
 set(SOURCES
-  fung_expression.cpp
-  fung_expression__evaluate.cpp
+  fung_Expression.cpp
+  fung_ExpressionNode.cpp
+  fung_ExpressionNode__evaluate.cpp
   fung_ExpressionMaker.cpp
   fung_statement.cpp
   fung_function.cpp
