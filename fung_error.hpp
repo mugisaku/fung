@@ -45,6 +45,13 @@ Error: public std::exception
 
   char const*  what() noexcept{return buffer;}
 
+  void  print() const
+  {
+    cursor.print();
+
+    printf(" %s\n",buffer);
+  }
+
 };
 
 

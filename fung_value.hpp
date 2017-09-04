@@ -21,6 +21,7 @@ ValueData
 {
   int     integer;
   bool    boolean;
+  char    character;
   String   string;
 
   Value*  value;
@@ -47,6 +48,7 @@ public:
    explicit Value(ValueKind  k): kind(k){}
    explicit Value(int  i);
    explicit Value(bool  b);
+   explicit Value(char  c);
    explicit Value(std::string const&  s);
    explicit Value(String&&  s);
    explicit Value(Value*  v);
@@ -101,6 +103,8 @@ public:
   static Value  lteq(   Value const&  lhs, Value const&  rhs);
   static Value  gt(     Value const&  lhs, Value const&  rhs);
   static Value  gteq(   Value const&  lhs, Value const&  rhs);
+
+  static Value  sus(Value const&  v, size_t   i);
 
   static Value  log_not(Value const&  lhs);
   static Value  bit_not(Value const&  lhs);

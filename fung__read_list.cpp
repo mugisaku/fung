@@ -1,6 +1,7 @@
 #include"fung.hpp"
 #include"fung_identifier.hpp"
 #include"fung_parameter.hpp"
+#include"fung_statement.hpp"
 #include"fung_ExpressionMaker.hpp"
 #include"fung_error.hpp"
 
@@ -34,6 +35,100 @@ read_parameter(Cursor&  cur)
   auto  variable_name = read_identifier(cur);
 
   return Parameter(vk,std::move(variable_name));
+}
+
+
+Statement
+read_statement(Cursor&  cur, std::string const&  fn_name)
+{
+  Cursor  currec = cur;
+
+  Statement  stmt;
+
+  skip_spaces_and_newline(cur);
+
+    if(isident0(*cur))
+    {
+      auto  id = read_identifier(cur);
+
+        if(id == "return")
+        {
+          ExpressionMaker  mk;
+
+          char  buf[256];
+
+          snprintf(buf,sizeof(buf),"関数%s内return文:",fn_name.data());
+
+          ReturnStatement  ret(mk(cur,buf));
+
+          stmt = Statement(std::move(ret));
+        }
+
+      else
+        if(id == "print")
+        {
+          ExpressionMaker  mk;
+
+          char  buf[256];
+
+          snprintf(buf,sizeof(buf),"関数%s内print文:",fn_name.data());
+
+          PrintStatement  prn(mk(cur,buf));
+
+          stmt = Statement(std::move(prn));
+        }
+
+      else
+        if(id == "interrupt")
+        {
+          stmt = Statement(InterruptStatement());
+        }
+
+      else
+        if(id == "let")
+        {
+          skip_spaces_and_newline(cur);
+
+            if(!isident0(*cur))
+            {
+              throw Error(currec,"let文で識別子が無い");
+            }
+
+
+          id = read_identifier(cur);
+
+          skip_spaces_and_newline(cur);
+
+            if(*cur != '=')
+            {
+              throw Error(currec,"let文で代入記号が無い");
+            }
+
+
+          cur += 1;
+
+
+          ExpressionMaker  mk;
+
+          LetStatement  let(std::move(id),mk(cur));
+
+          stmt = Statement(std::move(let));
+        }
+    }
+
+  else
+    if(*cur == ';')
+    {
+      cur += 1;
+    }
+
+  else
+    {
+      throw Error(currec,"文の途中で不明な文字");
+    }
+
+
+  return std::move(stmt);
 }
 
 
@@ -129,6 +224,46 @@ read_expression_list(Cursor&  cur)
         if(!o.compare(','))
         {
           break;
+        }
+    }
+
+
+  return std::move(ls);
+}
+
+
+StatementList
+read_statement_list(Cursor&  cur, std::string const&  id)
+{
+  StatementList  ls;
+
+    for(;;)
+    {
+      skip_spaces_and_newline(cur);
+
+      auto  const c = *cur;
+
+        if(c == '}')
+        {
+          cur += 1;
+
+          break;
+        }
+
+      else
+        if(!c)
+        {
+          throw Error(cur,"文リストの途中で終端文字");
+        }
+
+      else
+        {
+          auto  stmt = read_statement(cur,id);
+
+            if(stmt)
+            {
+              ls.emplace_back(std::move(stmt));
+            }
         }
     }
 

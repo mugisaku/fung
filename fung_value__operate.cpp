@@ -201,6 +201,16 @@ gteq(Value const&  lhs, Value const&  rhs)
 }
 
 
+Value
+Value::
+sus(Value const&  v, size_t  i)
+{
+  return (v == ValueKind::string)? Value(v->string.at(i))
+        :(v == ValueKind::string)? Value(v->list.at(i))
+        :undefined;
+}
+
+
 
 
 

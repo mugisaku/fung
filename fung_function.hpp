@@ -17,7 +17,7 @@ namespace fung{
 class Context;
 
 
-using FunctionBody = std::vector<Statement>;
+using FunctionBody = StatementList;
 
 
 

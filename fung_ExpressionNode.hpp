@@ -79,6 +79,8 @@ ExpressionNodeData
   Value            value;
   Identifier  identifier;
 
+  StatementList  statement_list;
+
   ExpressionList  list;
 
   ExpressionNodeData(){}
@@ -104,6 +106,7 @@ public:
   explicit ExpressionNode(Identifier&&  id);
   explicit ExpressionNode(Value&&  v);
   explicit ExpressionNode(ExpressionList&&  ls);
+  explicit ExpressionNode(StatementList&&  stmtls);
   ExpressionNode(Mnemonic  mn, Expression&&  l=Expression(),
                                Expression&&  r=Expression());
   ExpressionNode(ExpressionNode const&  rhs) noexcept{*this = rhs;}

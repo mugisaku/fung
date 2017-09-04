@@ -16,6 +16,7 @@ Value  const undefined(ValueKind::undefined);
 
 Value::Value(int  i): kind(ValueKind::integer){data.integer = i;}
 Value::Value(bool  b): kind(ValueKind::boolean){data.boolean = b;}
+Value::Value(char  c): kind(ValueKind::character){data.character = c;}
 Value::Value(Function const&  fn): kind(ValueKind::function){data.function = &fn;}
 Value::Value(std::string const&  s): kind(ValueKind::string){new(&data) String(s.data(),s.size());}
 Value::Value(String&&  s): kind(ValueKind::string){new(&data) String(std::move(s));}
@@ -42,6 +43,9 @@ operator=(Value const&  rhs) noexcept
       break;
   case(ValueKind::boolean):
       data.boolean = rhs.data.boolean;
+      break;
+  case(ValueKind::character):
+      data.character = rhs.data.character;
       break;
   case(ValueKind::integer):
       data.integer = rhs.data.integer;
@@ -85,6 +89,9 @@ operator=(Value&&  rhs) noexcept
   case(ValueKind::boolean):
       data.boolean = rhs.data.boolean;
       break;
+  case(ValueKind::character):
+      data.character = rhs.data.character;
+      break;
   case(ValueKind::integer):
       data.integer = rhs.data.integer;
       break;
@@ -122,6 +129,7 @@ clear()
   case(ValueKind::unevaluated):
   case(ValueKind::undefined):
   case(ValueKind::boolean):
+  case(ValueKind::character):
   case(ValueKind::integer):
   case(ValueKind::function):
       break;
@@ -161,6 +169,9 @@ print() const
       break;
   case(ValueKind::boolean):
       printf("%s",data.boolean? "true":"false");
+      break;
+  case(ValueKind::character):
+      printf("%c",data.character);
       break;
   case(ValueKind::integer):
       printf("%d",data.integer);
@@ -207,6 +218,7 @@ to_kind(std::string const&  s)
 {
        if(s == "integer" ){return ValueKind::integer;}
   else if(s == "boolean" ){return ValueKind::boolean;}
+  else if(s == "character"){return ValueKind::character;}
   else if(s == "string"  ){return ValueKind::string;}
   else if(s == "function"){return ValueKind::function;}
   else if(s == "list"    ){return ValueKind::list;}
@@ -225,6 +237,7 @@ to_string(ValueKind  k)
   static std::string  const i("integer");
   static std::string  const s("string");
   static std::string  const b("boolean");
+  static std::string  const c("character");
   static std::string  const l("list");
   static std::string  const a("any");
   static std::string  const u("undefined");
@@ -243,6 +256,9 @@ to_string(ValueKind  k)
       break;
   case(ValueKind::boolean):
       return b;
+      break;
+  case(ValueKind::character):
+      return c;
       break;
   case(ValueKind::integer):
       return i;

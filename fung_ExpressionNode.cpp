@@ -37,6 +37,14 @@ kind(ExpressionNodeKind::list)
 
 
 ExpressionNode::
+ExpressionNode(StatementList&&  stmtls):
+kind(ExpressionNodeKind::statement_list)
+{
+  new(&data) StatementList(std::move(stmtls));
+}
+
+
+ExpressionNode::
 ExpressionNode(Mnemonic  mn, Expression&&  l, Expression&&  r):
 kind(l? ExpressionNodeKind::operation
       : ExpressionNodeKind::operator_),
@@ -70,6 +78,9 @@ operator=(ExpressionNode const&  rhs) noexcept
       break;
   case(ExpressionNodeKind::identifier):
       new(&data) Identifier(rhs.data.identifier);
+      break;
+  case(ExpressionNodeKind::statement_list):
+      new(&data) StatementList(rhs.data.statement_list);
       break;
   case(ExpressionNodeKind::list):
       new(&data) ExpressionList(rhs.data.list);
@@ -109,6 +120,9 @@ operator=(ExpressionNode&&  rhs) noexcept
   case(ExpressionNodeKind::list):
       new(&data) ExpressionList(std::move(rhs.data.list));
       break;
+  case(ExpressionNodeKind::statement_list):
+      new(&data) StatementList(std::move(rhs.data.statement_list));
+      break;
     }
 
 
@@ -139,6 +153,9 @@ clear()
       break;
   case(ExpressionNodeKind::list):
       data.list.~vector();
+      break;
+  case(ExpressionNodeKind::statement_list):
+      data.statement_list.~vector();
       break;
     }
 
@@ -266,6 +283,28 @@ print() const
         }
 
       printf(")");
+      break;
+  case(ExpressionNodeKind::statement_list):
+      printf("{");
+
+        {
+          auto   it = data.statement_list.cbegin();
+          auto  end = data.statement_list.cend();
+
+            if(it != end)
+            {
+              (*it++)->print();
+
+                while(it != end)
+                {
+                  printf(",");
+
+                  (*it++)->print();
+                }
+            }
+        }
+
+      printf("}");
       break;
     }
 }

@@ -17,7 +17,7 @@ ExecutionFrame
 {
   std::string const&  function_name;
 
-  Function const&  function;
+  Function const*  function=nullptr;
 
   std::vector<Variable>  variable_list;
 
@@ -26,9 +26,11 @@ ExecutionFrame
 
 public:
   ExecutionFrame(std::string const&  fn_name, Function const&  fn);
+  ExecutionFrame(StatementList const&  stmtls);
 
   std::string const&  get_function_name() const{return function_name;}
-  Function const&  get_function() const{return function;}
+
+  Function const*  get_function() const{return function;}
 
   void  append_variable(Variable&&  var);
 

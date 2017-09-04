@@ -28,6 +28,9 @@ convert_to_boolean() const
   case(ValueKind::integer):
       return Value(data.integer? true:false);
       break;
+  case(ValueKind::character):
+      return Value(data.character? true:false);
+      break;
   case(ValueKind::string):
       return Value(data.string.length()? true:false);
       break;
@@ -82,6 +85,9 @@ convert_to_integer() const
       break;
   case(ValueKind::integer):
       return *this;
+      break;
+  case(ValueKind::character):
+      return Value(static_cast<int>(data.character));
       break;
   case(ValueKind::string):
       return Value(static_cast<int>(std::strtol(data.string.data(),nullptr,0)));

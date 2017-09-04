@@ -95,6 +95,20 @@ enter(std::string const&  fn_name, Function const&  fn)
 
 void
 Context::
+enter(StatementList const&  stmtls)
+{
+    if(frame_stack.size() > 1000)
+    {
+      throw Error("入れ子が1000を越えた");
+    }
+
+
+  frame_stack.emplace_back(stmtls);
+}
+
+
+void
+Context::
 leave()
 {
     if(frame_stack.empty())

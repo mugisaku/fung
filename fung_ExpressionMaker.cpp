@@ -68,13 +68,15 @@ operator<(Mnemonic  a, Mnemonic  b)
 Expression
 read_either_expression(Cursor&  cur)
 {
+  auto  currec = cur;
+
   ExpressionMaker  mk;
 
   auto  l = mk(cur,"条件演算の第一式");
 
     if(!mk.get_last_operator().compare(':'))
     {
-      throw Error("三項演算の\':\'がない");
+      throw Error(currec,"三項演算の\':\'がない");
     }
 
 
@@ -138,7 +140,7 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
         }
 
 
-      expr = Expression(ExpressionNode(Mnemonic::cal,std::move(l),std::move(r)));
+      expr = Expression(ExpressionNode(Mnemonic::sus,std::move(l),std::move(r)));
 
       return read_postfix_expression(cur,std::move(expr));
     }
@@ -201,6 +203,18 @@ process_operator(Cursor&  cur, TinyString const&  o)
     }
 
   else
+    if(o.compare('{'))
+    {
+      auto  stmtls = read_statement_list(cur,"関数内関数");
+
+      auto  expr = Expression(ExpressionNode(std::move(stmtls)));
+      
+      expr = read_postfix_expression(cur,std::move(expr));
+
+      push_operand(std::move(expr));
+    }
+
+  else
     if(o.compare('['))
     {
       throw Error("ここに'['は現れないはず");
@@ -211,6 +225,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
        o.compare(',') ||
        o.compare(')') ||
        o.compare(']') ||
+       o.compare('}') ||
        o.compare(':'))
     {
       need_to_close = true;
@@ -393,10 +408,11 @@ void
 ExpressionMaker::
 step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
 {
-    if((*e == ExpressionNodeKind::value     ) ||
-       (*e == ExpressionNodeKind::list      ) ||
-       (*e == ExpressionNodeKind::operation ) ||
-       (*e == ExpressionNodeKind::identifier))
+    if((*e == ExpressionNodeKind::value         ) ||
+       (*e == ExpressionNodeKind::list          ) ||
+       (*e == ExpressionNodeKind::statement_list) ||
+       (*e == ExpressionNodeKind::operation     ) ||
+       (*e == ExpressionNodeKind::identifier    ))
     {
       buf.emplace_back(std::move(e));
     }
@@ -468,6 +484,8 @@ Expression
 ExpressionMaker::
 operator()(Cursor&  cur, char const*  onerr_msg)
 {
+  Cursor  currec = cur;
+
   clear();
 
     try
@@ -475,11 +493,12 @@ operator()(Cursor&  cur, char const*  onerr_msg)
       run_first_phase(cur);
     }
 
+
     catch(Error&  e)
     {
-      printf("%s 第一段階でエラー\n",onerr_msg);
+      e.print();
 
-      throw;
+      throw Error(currec,"%s 第一段階でエラー\n",onerr_msg);
     }
 
 
@@ -490,9 +509,9 @@ operator()(Cursor&  cur, char const*  onerr_msg)
 
     catch(Error&  e)
     {
-      printf("%s 第二段階でエラー\n",onerr_msg);
+      e.print();
 
-      throw;
+      throw Error(currec,"%s 第二段階でエラー\n",onerr_msg);
     }
 }
 

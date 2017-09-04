@@ -107,6 +107,9 @@ public:
 
 using StatementList = std::vector<Statement>;
 
+class Cursor;
+
+StatementList  read_statement_list(Cursor&  cur, std::string const&  fn_name);
 
 }
 

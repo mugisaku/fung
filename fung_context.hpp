@@ -35,6 +35,7 @@ public:
   bool  run();
 
   void  enter(std::string const&  fn_name, Function const&  fn);
+  void  enter(StatementList const&  stmtls);
   void  leave();
 
   void  entry(std::string const&  name, Expression const&  expr);

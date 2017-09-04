@@ -128,6 +128,27 @@ operate(Context&  ctx, bool  b) const
     }
 
 
+    if(mnemonic == Mnemonic::sus)
+    {
+        if((lv != ValueKind::list  ) &&
+           (lv != ValueKind::string))
+        {
+          throw Error("添字アクセスするものが、リストでも文字列でもない");
+        }
+           
+
+      auto  rv = right->evaluate(ctx).convert_to_integer();
+
+        if(rv != ValueKind::integer)
+        {
+          throw Error("添字が整数でない");
+        }
+
+
+      return Value::sus(lv,rv->integer);
+    }
+
+
   auto  rv = right->evaluate(ctx);
 
     if(rv == ValueKind::list)
@@ -204,6 +225,12 @@ evaluate(Context&  ctx, bool  b) const
       break;
   case(ExpressionNodeKind::list):
       return Value(to_list(data.list,ctx));
+      break;
+  case(ExpressionNodeKind::statement_list):
+      ctx.enter(data.statement_list);
+      ctx.run();
+
+      return ctx.get_returned_value();
       break;
     }
 

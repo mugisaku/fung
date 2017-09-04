@@ -13,138 +13,6 @@ namespace fung{
 namespace{
 
 
-Statement
-read_statement(Cursor&  cur, std::string const&  fn_name)
-{
-  Statement  stmt;
-
-  skip_spaces_and_newline(cur);
-
-    if(isident0(*cur))
-    {
-      auto  id = read_identifier(cur);
-
-        if(id == "return")
-        {
-          ExpressionMaker  mk;
-
-          char  buf[256];
-
-          snprintf(buf,sizeof(buf),"関数%s内return文:",fn_name.data());
-
-          ReturnStatement  ret(mk(cur,buf));
-
-          stmt = Statement(std::move(ret));
-        }
-
-      else
-        if(id == "print")
-        {
-          ExpressionMaker  mk;
-
-          char  buf[256];
-
-          snprintf(buf,sizeof(buf),"関数%s内print文:",fn_name.data());
-
-          PrintStatement  prn(mk(cur,buf));
-
-          stmt = Statement(std::move(prn));
-        }
-
-      else
-        if(id == "interrupt")
-        {
-          stmt = Statement(InterruptStatement());
-        }
-
-      else
-        if(id == "let")
-        {
-          skip_spaces_and_newline(cur);
-
-            if(!isident0(*cur))
-            {
-              throw Error(cur,"let文で識別子が無い");
-            }
-
-
-          id = read_identifier(cur);
-
-          skip_spaces_and_newline(cur);
-
-            if(*cur != '=')
-            {
-              throw Error(cur,"let文で代入記号が無い");
-            }
-
-
-          cur += 1;
-
-
-          ExpressionMaker  mk;
-
-          LetStatement  let(std::move(id),mk(cur));
-
-          stmt = Statement(std::move(let));
-        }
-    }
-
-  else
-    if(*cur == ';')
-    {
-      cur += 1;
-    }
-
-  else
-    {
-      throw Error(cur,"文の途中で不明な文字");
-    }
-
-
-  return std::move(stmt);
-}
-
-
-FunctionBody
-read_function_body(Cursor&  cur, std::string const&  id)
-{
-  FunctionBody  body;
-
-    for(;;)
-    {
-      skip_spaces_and_newline(cur);
-
-      auto  const c = *cur;
-
-        if(c == '}')
-        {
-          cur += 1;
-
-          break;
-        }
-
-      else
-        if(!c)
-        {
-          throw Error(cur,"関数本体の途中で終端文字");
-        }
-
-      else
-        {
-          auto  stmt = read_statement(cur,id);
-
-            if(stmt)
-            {
-              body.emplace_back(std::move(stmt));
-            }
-        }
-    }
-
-
-  return std::move(body);
-}
-
-
 void
 process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
 {
@@ -196,7 +64,7 @@ process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
             {
               cur += 1;
 
-              body = read_function_body(cur,id);
+              body = read_statement_list(cur,id);
             }
 
 
