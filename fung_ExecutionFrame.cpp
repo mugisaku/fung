@@ -146,8 +146,57 @@ step(Context&  ctx, Value&  retval_buf)
       ctx.entry(stmt.get_identifier(),stmt.get_expression());
       break;
   case(StatementKind::return_):
-      retval_buf = stmt.get_expression()->evaluate(ctx);
-      return ExecutionResult::value_was_returned;
+      {
+        auto&  expr = stmt.get_expression();
+
+          if(*expr == ExpressionNodeKind::operation)
+          {
+              if((*expr)->mnemonic == Mnemonic::cal)
+              {
+                auto&  l = expr->get_left();
+                auto&  r = expr->get_right();
+
+                  if((*l == ExpressionNodeKind::identifier) &&
+                     (*r == ExpressionNodeKind::value))
+                  {
+                    auto&  id = (*l)->identifier.string;
+                    auto&  rv = (*r)->value;
+
+                      if((id == function_name) && (rv == ValueKind::list))
+                      {
+                        printf("末尾再帰最適化!\n");
+
+                        current = begin;
+
+                        auto  ls = rv->list;
+
+                        update_argument_list(std::move(ls));
+
+
+                        return ExecutionResult::no_value_was_returned;
+                      }
+                  }
+              }
+          }
+
+
+        retval_buf = expr->evaluate(ctx);
+
+          if(retval_buf == ValueKind::tail_calling)
+          {
+            printf("末尾再帰最適化!\n");
+
+            current = begin;
+
+            update_argument_list(std::move(retval_buf->list));
+
+
+            return ExecutionResult::no_value_was_returned;
+          }
+
+
+        return ExecutionResult::value_was_returned;
+      }
       break;
     }
 

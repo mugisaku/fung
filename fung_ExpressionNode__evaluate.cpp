@@ -13,17 +13,10 @@ namespace fung{
 
 Value
 ExpressionNode::
-operate(Context&  ctx, bool  b) const
+operate(Context&  ctx) const
 {
   auto&  mnemonic = data.mnemonic;
 
-    if(mnemonic == Mnemonic::eth)
-    {
-        if(b){return  left->evaluate(ctx);}
-      else   {return right->evaluate(ctx);}
-    }
-
-  
   auto  lv = left->evaluate(ctx);
 
     if(mnemonic == Mnemonic::cho)
@@ -92,13 +85,7 @@ operate(Context&  ctx, bool  b) const
 
     if(mnemonic == Mnemonic::cal)
     {
-      static std::string  const fn_name("匿名関数");
-
-        if(lv != ValueKind::function)
-        {
-          throw Error("関数呼び出しの左辺が関数参照ではない");
-        }
-
+      static std::string  const fn_name("無名関数");
 
       auto  rv = right->evaluate(ctx);
 
@@ -108,9 +95,21 @@ operate(Context&  ctx, bool  b) const
         }
 
 
+        if(lv != ValueKind::function)
+        {
+          throw Error("関数呼び出しの左辺が関数参照ではない");
+        }
+
+
       auto  flag = left->get_kind() == ExpressionNodeKind::identifier;      
 
       auto&  name = flag? (*left)->identifier.string:fn_name;
+
+        if(flag && (ctx->back().get_function_name() == name))
+        {
+          return Value(TailCalling(std::move(rv->list)));
+        }
+
 
       return ctx.call(name,*lv->function,std::move(rv->list));
     }
@@ -214,8 +213,11 @@ evaluate(Context&  ctx, bool  b) const
   case(ExpressionNodeKind::operator_):
       throw Error("未定義の値");
       break;
+  case(ExpressionNodeKind::paired):
+      return (b? left:right)->evaluate(ctx);
+      break;
   case(ExpressionNodeKind::operation):
-      return operate(ctx,b);
+      return operate(ctx);
       break;
   case(ExpressionNodeKind::value):
       return data.value;

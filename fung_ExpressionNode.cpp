@@ -29,6 +29,15 @@ kind(ExpressionNodeKind::value)
 
 
 ExpressionNode::
+ExpressionNode(PairedExpression&&  p):
+kind(ExpressionNodeKind::paired),
+left(std::move(p.first)),
+right(std::move(p.second))
+{
+}
+
+
+ExpressionNode::
 ExpressionNode(ExpressionList&&  ls):
 kind(ExpressionNodeKind::list)
 {
@@ -70,6 +79,7 @@ operator=(ExpressionNode const&  rhs) noexcept
         switch(kind)
         {
       case(ExpressionNodeKind::null):
+      case(ExpressionNodeKind::paired):
           break;
       case(ExpressionNodeKind::operator_):
       case(ExpressionNodeKind::operation):
@@ -112,6 +122,7 @@ operator=(ExpressionNode&&  rhs) noexcept
         switch(kind)
         {
       case(ExpressionNodeKind::null):
+      case(ExpressionNodeKind::paired):
           break;
       case(ExpressionNodeKind::operator_):
       case(ExpressionNodeKind::operation):
@@ -152,6 +163,7 @@ clear()
   case(ExpressionNodeKind::null):
   case(ExpressionNodeKind::operator_):
   case(ExpressionNodeKind::operation):
+  case(ExpressionNodeKind::paired):
       break;
   case(ExpressionNodeKind::value):
       data.value.~Value();
@@ -213,7 +225,6 @@ is_binary_operator() const
          (mn == Mnemonic::gt     ) ||
          (mn == Mnemonic::gteq   ) ||
          (mn == Mnemonic::cho    ) ||
-         (mn == Mnemonic::eth    ) ||
          (mn == Mnemonic::acc    ) ||
          (mn == Mnemonic::ina    ) ||
          (mn == Mnemonic::sus    ) ||
@@ -239,6 +250,11 @@ print() const
     {
   case(ExpressionNodeKind::null):
       printf("NULL ");
+      break;
+  case(ExpressionNodeKind::paired):
+      left->print();
+      printf(":");
+      right->print();
       break;
   case(ExpressionNodeKind::operator_):
       print_mnemonic(data.mnemonic);
@@ -349,7 +365,6 @@ print_mnemonic(Mnemonic  mn)
   case(Mnemonic::log_not): s = "!";break;
   case(Mnemonic::neg): s = "-";break;
   case(Mnemonic::cho): s = "?";break;
-  case(Mnemonic::eth): s = ":";break;
   case(Mnemonic::sus): s = "";break;
   case(Mnemonic::cal): s = "";break;
   case(Mnemonic::acc): s = ".";break;

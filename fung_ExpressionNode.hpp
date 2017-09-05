@@ -17,6 +17,8 @@ class ExpressionNode;
 
 using ExpressionList = std::vector<Expression>;
 
+using PairedExpression = std::pair<Expression,Expression>;
+
 
 enum class
 Mnemonic
@@ -44,7 +46,6 @@ Mnemonic
   log_not,
   neg,
   cho,
-  eth,
   sus,
   cal,
   acc,
@@ -62,6 +63,8 @@ ExpressionNodeKind
   operator_,
 
   operation,
+
+  paired,
 
   value,
   identifier,
@@ -98,13 +101,14 @@ ExpressionNode
   Expression   left;
   Expression  right;
 
-  Value  operate(Context&  ctx, bool  b) const;
+  Value  operate(Context&  ctx) const;
 
 public:
   ExpressionNode(){}
   explicit ExpressionNode(ExpressionNodeKind  k): kind(k){}
   explicit ExpressionNode(Identifier&&  id);
   explicit ExpressionNode(Value&&  v);
+  explicit ExpressionNode(PairedExpression&&  p);
   explicit ExpressionNode(ExpressionList&&  ls);
   explicit ExpressionNode(StatementList&&  stmtls);
   ExpressionNode(Mnemonic  mn, Expression&&  l=Expression(),
@@ -126,6 +130,9 @@ public:
   void  clear();
 
   ExpressionNodeKind  get_kind() const{return kind;}
+
+  Expression const&  get_left()  const{return  left;}
+  Expression const&  get_right() const{return right;}
 
   bool   is_unary_operator() const;
   bool  is_binary_operator() const;

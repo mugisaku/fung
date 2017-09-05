@@ -22,6 +22,7 @@ Value::Value(std::string const&  s): kind(ValueKind::string){new(&data) String(s
 Value::Value(String&&  s): kind(ValueKind::string){new(&data) String(std::move(s));}
 Value::Value(Value*  v): kind(ValueKind::any){data.value = v;}
 Value::Value(List&&  ls): kind(ValueKind::list){new(&data) List(std::move(ls));}
+Value::Value(TailCalling&&  tc): kind(ValueKind::tail_calling){new(&data) List(std::move(tc.list));}
 Value::Value(Pointer&&  ptr): kind(ValueKind::pointer){new(&data) Pointer(std::move(ptr));}
 
 
@@ -107,6 +108,7 @@ operator=(Value&&  rhs) noexcept
           data.value = rhs.data.value;
           break;
       case(ValueKind::list):
+      case(ValueKind::tail_calling):
           new(&data) List(std::move(rhs.data.list));
           break;
       case(ValueKind::pointer):
@@ -146,6 +148,7 @@ clear()
       delete data.value;
       break;
   case(ValueKind::list):
+  case(ValueKind::tail_calling):
       data.list.~Branch();
       break;
   case(ValueKind::pointer):
@@ -193,6 +196,9 @@ print() const
       break;
   case(ValueKind::pointer):
       data.pointer.print();
+      break;
+  case(ValueKind::tail_calling):
+      printf("TAIL_CALLING");
       break;
   case(ValueKind::list):
       {

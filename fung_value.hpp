@@ -16,6 +16,16 @@ class Function;
 class Value;
 
 
+struct
+TailCalling
+{
+  List&&  list;
+
+  TailCalling(List&&  ls): list(std::move(ls)){}
+
+};
+
+
 union
 ValueData
 {
@@ -52,6 +62,7 @@ public:
    explicit Value(std::string const&  s);
    explicit Value(String&&  s);
    explicit Value(Value*  v);
+   explicit Value(TailCalling&&  tc);
    explicit Value(List&&  ls);
    explicit Value(Function const&  fn);
    explicit Value(Pointer&&  ptr);

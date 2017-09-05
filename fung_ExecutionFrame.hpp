@@ -37,6 +37,8 @@ ExecutionFrame
   FunctionBody::const_iterator  current;
   FunctionBody::const_iterator      end;
 
+  void  update_argument_list(List&&  valls);
+
 public:
   ExecutionFrame(std::string const&  fn_name, Function const&  fn, List&&  valls);
   ExecutionFrame(StatementList const&  stmtls);
@@ -44,8 +46,6 @@ public:
   std::string const&  get_function_name() const{return function_name;}
 
   Function const*  get_function() const{return function;}
-
-  void  update_argument_list(List&&  valls);
 
   void  append_variable(Variable&&  var);
 

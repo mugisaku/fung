@@ -27,6 +27,8 @@ ValueKind
   list,
   pointer,
 
+  tail_calling,
+
   any,
 
   reference,

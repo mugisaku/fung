@@ -48,7 +48,6 @@ precedence(Mnemonic  mn)
   case(Mnemonic::log_and): p -= 13;break;
   case(Mnemonic::log_or ): p -= 14;break;
   case(Mnemonic::cho    ): p -= 15;break;
-  case(Mnemonic::eth    ): p -= 15;break;
   default:
       throw Error("不明なニーモニック");
     }
@@ -82,7 +81,9 @@ read_either_expression(Cursor&  cur)
 
   auto  r = mk(cur,"条件演算の第二式");
 
-  return Expression(ExpressionNode(Mnemonic::eth,std::move(l),std::move(r)));
+  auto  p = std::make_pair(std::move(l),std::move(r));
+
+  return Expression(ExpressionNode(std::move(p)));
 }
 
 
@@ -412,6 +413,7 @@ step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
        (*e == ExpressionNodeKind::list          ) ||
        (*e == ExpressionNodeKind::statement_list) ||
        (*e == ExpressionNodeKind::operation     ) ||
+       (*e == ExpressionNodeKind::paired        ) ||
        (*e == ExpressionNodeKind::identifier    ))
     {
       buf.emplace_back(std::move(e));
