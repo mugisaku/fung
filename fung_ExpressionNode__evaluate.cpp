@@ -13,150 +13,160 @@ namespace fung{
 
 Value
 ExpressionNode::
-operate(Context&  ctx) const
+tail_call(Context&  ctx) const
 {
-  auto&  mnemonic = data.mnemonic;
-
-  auto  lv = left->evaluate(ctx);
-
-    if(mnemonic == Mnemonic::cho)
+    if((*left  == ExpressionNodeKind::identifier) &&
+       (*right == ExpressionNodeKind::value))
     {
-      auto  b = lv.convert_to_boolean();
+      auto&  id = (*left )->identifier.string;
+      auto   rv = (*right).evaluate(ctx,true);
 
-        if(b.is_undefined())
-        {
-          throw Error("論理値が未定義");
-        }
+      auto&  function_name = ctx->back().get_function_name();
 
-
-      return right->evaluate(ctx,b->boolean);
-    }
-
-  else
-    if(mnemonic == Mnemonic::log_or)
-    {
-      auto  b = lv.convert_to_boolean();
-
-        if(b.is_undefined())
-        {
-          throw Error("論理値が未定義");
-        }
-
-
-        if(b->boolean)
-        {
-          return Value(true);
-        }
-
-
-      auto  rv = right->evaluate(ctx);
-
-      return rv.convert_to_boolean();
-    }
-
-  else
-    if(mnemonic == Mnemonic::log_and)
-    {
-      auto  b = lv.convert_to_boolean();
-
-        if(b.is_undefined())
-        {
-          throw Error("論理値が未定義");
-        }
-
-
-        if(!b->boolean)
-        {
-          return Value(false);
-        }
-
-
-      auto  rv = right->evaluate(ctx);
-
-      return rv.convert_to_boolean();
-    }
-
-
-
-       if(mnemonic == Mnemonic::neg    ){return Value::neg(    lv);}
-  else if(mnemonic == Mnemonic::log_not){return Value::log_not(lv);}
-  else if(mnemonic == Mnemonic::bit_not){return Value::bit_not(lv);}
-  else if(mnemonic == Mnemonic::der    ){return Value::der(    lv);}
-
-    if(mnemonic == Mnemonic::cal)
-    {
-      static std::string  const fn_name("無名関数");
-
-      auto  rv = right->evaluate(ctx);
-
-        if(rv != ValueKind::list)
-        {
-          throw Error("関数呼び出しの右辺が引数リストではない");
-        }
-
-
-        if(lv != ValueKind::function)
-        {
-          throw Error("関数呼び出しの左辺が関数参照ではない");
-        }
-
-
-      auto  flag = left->get_kind() == ExpressionNodeKind::identifier;      
-
-      auto&  name = flag? (*left)->identifier.string:fn_name;
-
-        if(flag && (ctx->back().get_function_name() == name))
+        if((id == function_name) && (rv == ValueKind::list))
         {
           return Value(TailCalling(std::move(rv->list)));
         }
-
-
-      return ctx.call(name,*lv->function,std::move(rv->list));
     }
 
 
-    if(mnemonic == Mnemonic::acc)
+  return cal(ctx,left->evaluate(ctx,true));
+}
+
+
+Value
+ExpressionNode::
+choice(Context&  ctx, Value const&  lv, bool  multi) const
+{
+  auto  b = lv.convert_to_boolean();
+
+    if(b.is_undefined())
     {
-        if(right->get_kind() != ExpressionNodeKind::identifier)
-        {
-          throw Error("メンバー呼び出しの右辺が識別子ではない");
-        }
-
-
-      return lv.get_property((*right)->identifier.string);
+      throw Error("論理値が未定義");
     }
 
 
-    if(mnemonic == Mnemonic::sus)
+    if(*right != ExpressionNodeKind::paired)
     {
-        if((lv != ValueKind::list  ) &&
-           (lv != ValueKind::string))
-        {
-          throw Error("添字アクセスするものが、リストでも文字列でもない");
-        }
-           
-
-      auto  rv = right->evaluate(ctx).convert_to_integer();
-
-        if(rv != ValueKind::integer)
-        {
-          throw Error("添字が整数でない");
-        }
-
-
-      return Value::sus(lv,rv->integer);
+      throw Error("条件演算の右辺が@airedでない");
     }
 
 
-  auto  rv = right->evaluate(ctx);
+  return b->boolean?  right->get_left()->evaluate(ctx,multi)
+                   : right->get_right()->evaluate(ctx,multi);
+}
 
-    if(rv == ValueKind::list)
+
+Value
+ExpressionNode::
+log_or(Context&  ctx, Value const&  lv) const
+{
+  auto  b = lv.convert_to_boolean();
+
+    if(b.is_undefined())
     {
-      rv = rv->list.back();
+      throw Error("論理値が未定義");
     }
 
 
-    switch(mnemonic)
+    if(b->boolean)
+    {
+      return Value(true);
+    }
+
+
+  auto  rv = right->evaluate(ctx,true);
+
+  return rv.convert_to_boolean();
+}
+
+
+Value
+ExpressionNode::
+log_and(Context&  ctx, Value const&  lv) const
+{
+  auto  b = lv.convert_to_boolean();
+
+    if(b.is_undefined())
+    {
+      throw Error("論理値が未定義");
+    }
+
+
+    if(!b->boolean)
+    {
+      return Value(false);
+    }
+
+
+  auto  rv = right->evaluate(ctx,true);
+
+  return rv.convert_to_boolean();
+}
+
+
+Value
+ExpressionNode::
+cal(Context&  ctx, Value const&  lv) const
+{
+  static std::string  const fn_name("無名関数");
+
+  auto  rv = right->evaluate(ctx,true);
+
+    if(rv != ValueKind::list)
+    {
+      throw Error("関数呼び出しの右辺が引数リストではない");
+    }
+
+
+    if(lv != ValueKind::function)
+    {
+      throw Error("関数呼び出しの左辺が関数参照ではない");
+    }
+
+
+  auto  flag = left->get_kind() == ExpressionNodeKind::identifier;      
+
+  auto&  name = flag? (*left)->identifier.string:fn_name;
+
+    if(flag && (ctx->back().get_function_name() == name))
+    {
+      return Value(TailCalling(std::move(rv->list)));
+    }
+
+
+  return ctx.call(name,*lv->function,std::move(rv->list));
+}
+
+
+Value
+ExpressionNode::
+sus(Context&  ctx, Value const&  lv) const
+{
+    if((lv != ValueKind::list  ) &&
+       (lv != ValueKind::string))
+    {
+      throw Error("添字アクセスするものが、リストでも文字列でもない");
+    }
+       
+
+  auto  rv = right->evaluate(ctx,true).convert_to_integer();
+
+    if(rv != ValueKind::integer)
+    {
+      throw Error("添字が整数でない");
+    }
+
+
+  return Value::sus(lv,rv->integer);
+}
+
+
+Value
+ExpressionNode::
+binop(Context&  ctx, Value const&  lv, Value const&  rv) const
+{
+    switch(data.mnemonic)
     {
   case(Mnemonic::add): return Value::add(lv,rv);
   case(Mnemonic::sub): return Value::sub(lv,rv);
@@ -190,10 +200,6 @@ operate(Context&  ctx) const
   case(Mnemonic::lteq   ): return Value::lteq(   lv,rv);
   case(Mnemonic::gt     ): return Value::gt(     lv,rv);
   case(Mnemonic::gteq   ): return Value::gteq(   lv,rv);
-  case(Mnemonic::sus):
-      {
-      }
-      break;
   default:
       throw Error(Cursor(),"");
     }
@@ -205,7 +211,81 @@ operate(Context&  ctx) const
 
 Value
 ExpressionNode::
-evaluate(Context&  ctx, bool  b) const
+operate(Context&  ctx, bool  multi) const
+{
+  auto&  mnemonic = data.mnemonic;
+
+    if(multi && (mnemonic == Mnemonic::cal))
+    {
+      return tail_call(ctx);
+    }
+
+
+  auto  lv = left->evaluate(ctx,true);
+
+    if(mnemonic == Mnemonic::cho)
+    {
+      return choice(ctx,lv,multi);
+    }
+
+  else
+    if(mnemonic == Mnemonic::log_or)
+    {
+      return log_or(ctx,lv);
+    }
+
+  else
+    if(mnemonic == Mnemonic::log_and)
+    {
+      return log_and(ctx,lv);
+    }
+
+
+
+       if(mnemonic == Mnemonic::neg    ){return Value::neg(    lv);}
+  else if(mnemonic == Mnemonic::log_not){return Value::log_not(lv);}
+  else if(mnemonic == Mnemonic::bit_not){return Value::bit_not(lv);}
+  else if(mnemonic == Mnemonic::der    ){return Value::der(    lv);}
+
+    if(mnemonic == Mnemonic::cal)
+    {
+      return cal(ctx,lv);
+    }
+
+
+    if(mnemonic == Mnemonic::acc)
+    {
+        if(right->get_kind() != ExpressionNodeKind::identifier)
+        {
+          throw Error("メンバー呼び出しの右辺が識別子ではない");
+        }
+
+
+      return lv.get_property((*right)->identifier.string);
+    }
+
+
+    if(mnemonic == Mnemonic::sus)
+    {
+      return sus(ctx,lv);
+    }
+
+
+  auto  rv = right->evaluate(ctx,true);
+
+    if(rv == ValueKind::list)
+    {
+      rv = rv->list.back();
+    }
+
+
+  return binop(ctx,lv,rv);
+}
+
+
+Value
+ExpressionNode::
+evaluate(Context&  ctx, bool  multi) const
 {
     switch(kind)
     {
@@ -214,10 +294,10 @@ evaluate(Context&  ctx, bool  b) const
       throw Error("未定義の値");
       break;
   case(ExpressionNodeKind::paired):
-      return (b? left:right)->evaluate(ctx);
+      throw Error("pairedがここで評価されてはいけない");
       break;
   case(ExpressionNodeKind::operation):
-      return operate(ctx);
+      return operate(ctx,multi);
       break;
   case(ExpressionNodeKind::value):
       return data.value;

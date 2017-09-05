@@ -43,14 +43,24 @@ run(std::string const&  function_name, List&&  args)
 
 
 
+void
+Context::
+check_depth() const
+{
+  constexpr int  limit = 1000;
+
+    if(frame_stack.size() > limit)
+    {
+      throw Error("呼び出し深度が%dを越えた",limit);
+    }
+}
+
+
 Value
 Context::
 call(std::string const&  fn_name, Function const&  fn, List&&  args)
 {
-    if(frame_stack.size() > 1000)
-    {
-      throw Error("入れ子が1000を越えた");
-    }
+  check_depth();
 
 
   frame_stack.emplace_back(fn_name,fn,std::move(args));
@@ -67,10 +77,7 @@ Value
 Context::
 call(StatementList const&  stmtls)
 {
-    if(frame_stack.size() > 1000)
-    {
-      throw Error("入れ子が1000を越えた");
-    }
+  check_depth();
 
 
   frame_stack.emplace_back(stmtls);

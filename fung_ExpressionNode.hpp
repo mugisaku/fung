@@ -101,7 +101,17 @@ ExpressionNode
   Expression   left;
   Expression  right;
 
-  Value  operate(Context&  ctx) const;
+  Value  operate(Context&  ctx, bool  multi) const;
+
+  Value  choice(Context&  ctx, Value const&  lv, bool  multi) const;
+
+  Value  tail_call(Context&  ctx) const;
+
+  Value  log_or(Context&  ctx, Value const&  lv) const;
+  Value  log_and(Context&  ctx, Value const&  lv) const;
+  Value  cal(Context&  ctx, Value const&  lv) const;
+  Value  sus(Context&  ctx, Value const&  lv) const;
+  Value  binop(Context&  ctx, Value const&  lv, Value const&  rv) const;
 
 public:
   ExpressionNode(){}
@@ -138,7 +148,7 @@ public:
   bool  is_binary_operator() const;
   bool          is_operand() const;
 
-  Value  evaluate(Context&  ctx, bool  b=true) const;
+  Value  evaluate(Context&  ctx, bool  multi=false) const;
 
   void  print() const;
 

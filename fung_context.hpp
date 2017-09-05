@@ -27,6 +27,7 @@ Context
   Value  start();
   void   leave();
 
+  void  check_depth() const;
 
 public:
   Context(std::unique_ptr<GlobalSpace> const&  gsp): global_space(gsp){}
