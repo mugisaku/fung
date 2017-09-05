@@ -6,6 +6,7 @@
 #include"fung_ExpressionNode.hpp"
 #include<string>
 #include<cstdio>
+#include<vector>
 #include<memory>
 
 
@@ -20,13 +21,14 @@ Variable
 {
   std::string  name;
 
-  Expression  expression;
-
   Value  value;
 
   Variable(std::string const&  name_, Value const&  v): name(name_), value(v){}
 
 };
+
+
+using VariableList = std::vector<Variable>;
 
 
 struct

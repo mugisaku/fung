@@ -186,21 +186,11 @@ main(int  argc, char**  argv)
 
           List  args({Value(std::string(s))});
 
-            if(ctx.prepare_to_run("main",args))
-            {
-                if(ctx.run())
-                {
-                  printf("返り値: ");
+          auto  retval = ctx.run("main",std::move(args));
 
-                  ctx.get_returned_value().print();
-                }
+          printf("返り値: ");
 
-              else
-                {
-                  printf("中断しました");
-                }
-            }
-
+          retval.print();
 
           printf("\n");
         }

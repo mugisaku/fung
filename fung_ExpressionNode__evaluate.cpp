@@ -112,7 +112,7 @@ operate(Context&  ctx, bool  b) const
 
       auto&  name = flag? (*left)->identifier.string:fn_name;
 
-      return (*lv->function)(name,ctx,rv->list);
+      return ctx.call(name,*lv->function,std::move(rv->list));
     }
 
 
@@ -227,10 +227,7 @@ evaluate(Context&  ctx, bool  b) const
       return Value(to_list(data.list,ctx));
       break;
   case(ExpressionNodeKind::statement_list):
-      ctx.enter(data.statement_list);
-      ctx.run();
-
-      return ctx.get_returned_value();
+      return ctx.call(data.statement_list);
       break;
     }
 

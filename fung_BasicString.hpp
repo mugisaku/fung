@@ -56,21 +56,24 @@ public:
 
   BasicString&  operator=(BasicString const&  rhs) noexcept
   {
-    clear();
-
-    var.pointer = new T[rhs.length()+1];
-
-    var.length   = rhs.length();
-    var.capacity = rhs.length();
-
-    auto  dst =     data();
-    auto  src = rhs.data();
-
-    auto  n = length();
-
-      while(n--)
+      if(&rhs != this)
       {
-        *dst++ = *src++;
+        clear();
+
+        var.pointer = new T[rhs.length()+1];
+
+        var.length   = rhs.length();
+        var.capacity = rhs.length();
+
+        auto  dst =     data();
+        auto  src = rhs.data();
+
+        auto  n = length();
+
+          while(n--)
+          {
+            *dst++ = *src++;
+          }
       }
 
 
@@ -79,13 +82,17 @@ public:
 
   BasicString&  operator=(BasicString&&  rhs) noexcept
   {
-    clear();
+      if(&rhs != this)
+      {
+        clear();
 
-    var.pointer = rhs.var.pointer          ;
-                  rhs.var.pointer = nullptr;
+        var.pointer = rhs.var.pointer          ;
+                      rhs.var.pointer = nullptr;
 
-    var.length   = rhs.length();
-    var.capacity = rhs.capacity();
+        var.length   = rhs.length();
+        var.capacity = rhs.capacity();
+      }
+
 
     return *this;
   }

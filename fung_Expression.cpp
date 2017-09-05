@@ -11,7 +11,11 @@ Expression&
 Expression::
 operator=(Expression const&  rhs) noexcept
 {
-  reset(rhs.ptr? new ExpressionNode(*rhs.ptr):nullptr);
+    if(&rhs != this)
+    {
+      reset(rhs.ptr? new ExpressionNode(*rhs.ptr):nullptr);
+    }
+
 
   return *this;
 }
@@ -21,8 +25,12 @@ Expression&
 Expression::
 operator=(Expression&&  rhs) noexcept
 {
-  reset(rhs.ptr)         ;
-        rhs.ptr = nullptr;
+    if(&rhs != this)
+    {
+      reset(rhs.ptr)         ;
+            rhs.ptr = nullptr;
+    }
+
 
   return *this;
 }

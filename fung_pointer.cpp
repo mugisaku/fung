@@ -20,21 +20,24 @@ Pointer&
 Pointer::
 operator=(Pointer const&  rhs) noexcept
 {
-  clear();
-
-  kind  = rhs.kind;
-  index = rhs.index;
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(PointerKind::null):
-      break;
-  case(PointerKind::string):
-      new(&data) String::Bud(rhs.data.string_bud);
-      break;
-  case(PointerKind::list):
-      new(&data) List::Bud(rhs.data.list_bud);
-      break;
+      clear();
+
+      kind  = rhs.kind;
+      index = rhs.index;
+
+        switch(kind)
+        {
+      case(PointerKind::null):
+          break;
+      case(PointerKind::string):
+          new(&data) String::Bud(rhs.data.string_bud);
+          break;
+      case(PointerKind::list):
+          new(&data) List::Bud(rhs.data.list_bud);
+          break;
+        }
     }
 
 
@@ -46,22 +49,25 @@ Pointer&
 Pointer::
 operator=(Pointer&&  rhs) noexcept
 {
-  clear();
-
-  std::swap(kind,rhs.kind);
-
-  index = rhs.index;
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(PointerKind::null):
-      break;
-  case(PointerKind::string):
-      new(&data) String::Bud(std::move(rhs.data.string_bud));
-      break;
-  case(PointerKind::list):
-      new(&data) List::Bud(std::move(rhs.data.list_bud));
-      break;
+      clear();
+
+      std::swap(kind,rhs.kind);
+
+      index = rhs.index;
+
+        switch(kind)
+        {
+      case(PointerKind::null):
+          break;
+      case(PointerKind::string):
+          new(&data) String::Bud(std::move(rhs.data.string_bud));
+          break;
+      case(PointerKind::list):
+          new(&data) List::Bud(std::move(rhs.data.list_bud));
+          break;
+        }
     }
 
 

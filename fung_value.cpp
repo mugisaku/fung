@@ -31,40 +31,43 @@ Value&
 Value::
 operator=(Value const&  rhs) noexcept
 {
-  clear();
-
-  kind = rhs.kind;
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(ValueKind::null):
-  case(ValueKind::unevaluated):
-  case(ValueKind::undefined):
-      break;
-  case(ValueKind::boolean):
-      data.boolean = rhs.data.boolean;
-      break;
-  case(ValueKind::character):
-      data.character = rhs.data.character;
-      break;
-  case(ValueKind::integer):
-      data.integer = rhs.data.integer;
-      break;
-  case(ValueKind::string):
-      new(&data) String(rhs.data.string);
-      break;
-  case(ValueKind::any):
-      data.value = new Value(*rhs.data.value);
-      break;
-  case(ValueKind::list):
-      new(&data) List(rhs.data.list);
-      break;
-  case(ValueKind::pointer):
-      new(&data) Pointer(rhs.data.pointer);
-      break;
-  case(ValueKind::function):
-      data.function = rhs.data.function;
-      break;
+      clear();
+
+      kind = rhs.kind;
+
+        switch(kind)
+        {
+      case(ValueKind::null):
+      case(ValueKind::unevaluated):
+      case(ValueKind::undefined):
+          break;
+      case(ValueKind::boolean):
+          data.boolean = rhs.data.boolean;
+          break;
+      case(ValueKind::character):
+          data.character = rhs.data.character;
+          break;
+      case(ValueKind::integer):
+          data.integer = rhs.data.integer;
+          break;
+      case(ValueKind::string):
+          new(&data) String(rhs.data.string);
+          break;
+      case(ValueKind::any):
+          data.value = new Value(*rhs.data.value);
+          break;
+      case(ValueKind::list):
+          new(&data) List(rhs.data.list);
+          break;
+      case(ValueKind::pointer):
+          new(&data) Pointer(rhs.data.pointer);
+          break;
+      case(ValueKind::function):
+          data.function = rhs.data.function;
+          break;
+        }
     }
 
 
@@ -76,40 +79,43 @@ Value&
 Value::
 operator=(Value&&  rhs) noexcept
 {
-  clear();
-
-  std::swap(kind,rhs.kind);
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(ValueKind::null):
-  case(ValueKind::unevaluated):
-  case(ValueKind::undefined):
-      break;
-  case(ValueKind::boolean):
-      data.boolean = rhs.data.boolean;
-      break;
-  case(ValueKind::character):
-      data.character = rhs.data.character;
-      break;
-  case(ValueKind::integer):
-      data.integer = rhs.data.integer;
-      break;
-  case(ValueKind::string):
-      new(&data) String(std::move(rhs.data.string));
-      break;
-  case(ValueKind::any):
-      data.value = rhs.data.value;
-      break;
-  case(ValueKind::list):
-      new(&data) List(std::move(rhs.data.list));
-      break;
-  case(ValueKind::pointer):
-      new(&data) Pointer(std::move(rhs.data.pointer));
-      break;
-  case(ValueKind::function):
-      data.function = rhs.data.function;
-      break;
+      clear();
+
+      std::swap(kind,rhs.kind);
+
+        switch(kind)
+        {
+      case(ValueKind::null):
+      case(ValueKind::unevaluated):
+      case(ValueKind::undefined):
+          break;
+      case(ValueKind::boolean):
+          data.boolean = rhs.data.boolean;
+          break;
+      case(ValueKind::character):
+          data.character = rhs.data.character;
+          break;
+      case(ValueKind::integer):
+          data.integer = rhs.data.integer;
+          break;
+      case(ValueKind::string):
+          new(&data) String(std::move(rhs.data.string));
+          break;
+      case(ValueKind::any):
+          data.value = rhs.data.value;
+          break;
+      case(ValueKind::list):
+          new(&data) List(std::move(rhs.data.list));
+          break;
+      case(ValueKind::pointer):
+          new(&data) Pointer(std::move(rhs.data.pointer));
+          break;
+      case(ValueKind::function):
+          data.function = rhs.data.function;
+          break;
+        }
     }
 
 

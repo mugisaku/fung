@@ -61,35 +61,39 @@ ExpressionNode&
 ExpressionNode::
 operator=(ExpressionNode const&  rhs) noexcept
 {
-  clear();
-
-  kind = rhs.kind;
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(ExpressionNodeKind::null):
-      break;
-  case(ExpressionNodeKind::operator_):
-  case(ExpressionNodeKind::operation):
-      data.mnemonic = rhs.data.mnemonic;
-      break;
-  case(ExpressionNodeKind::value):
-      new(&data) Value(rhs.data.value);
-      break;
-  case(ExpressionNodeKind::identifier):
-      new(&data) Identifier(rhs.data.identifier);
-      break;
-  case(ExpressionNodeKind::statement_list):
-      new(&data) StatementList(rhs.data.statement_list);
-      break;
-  case(ExpressionNodeKind::list):
-      new(&data) ExpressionList(rhs.data.list);
-      break;
+      clear();
+
+      kind = rhs.kind;
+
+        switch(kind)
+        {
+      case(ExpressionNodeKind::null):
+          break;
+      case(ExpressionNodeKind::operator_):
+      case(ExpressionNodeKind::operation):
+          data.mnemonic = rhs.data.mnemonic;
+          break;
+      case(ExpressionNodeKind::value):
+          new(&data) Value(rhs.data.value);
+          break;
+      case(ExpressionNodeKind::identifier):
+          new(&data) Identifier(rhs.data.identifier);
+          break;
+      case(ExpressionNodeKind::statement_list):
+          new(&data) StatementList(rhs.data.statement_list);
+          break;
+      case(ExpressionNodeKind::list):
+          new(&data) ExpressionList(rhs.data.list);
+          break;
+        }
+
+
+      left  = rhs.left ;
+      right = rhs.right;
     }
 
-
-  left  = rhs.left ;
-  right = rhs.right;
 
   return *this;
 }
@@ -99,35 +103,39 @@ ExpressionNode&
 ExpressionNode::
 operator=(ExpressionNode&&  rhs) noexcept
 {
-  clear();
-
-  std::swap(kind,rhs.kind);
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(ExpressionNodeKind::null):
-      break;
-  case(ExpressionNodeKind::operator_):
-  case(ExpressionNodeKind::operation):
-      data.mnemonic = rhs.data.mnemonic;
-      break;
-  case(ExpressionNodeKind::value):
-      new(&data) Value(std::move(rhs.data.value));
-      break;
-  case(ExpressionNodeKind::identifier):
-      new(&data) Identifier(std::move(rhs.data.identifier));
-      break;
-  case(ExpressionNodeKind::list):
-      new(&data) ExpressionList(std::move(rhs.data.list));
-      break;
-  case(ExpressionNodeKind::statement_list):
-      new(&data) StatementList(std::move(rhs.data.statement_list));
-      break;
+      clear();
+
+      std::swap(kind,rhs.kind);
+
+        switch(kind)
+        {
+      case(ExpressionNodeKind::null):
+          break;
+      case(ExpressionNodeKind::operator_):
+      case(ExpressionNodeKind::operation):
+          data.mnemonic = rhs.data.mnemonic;
+          break;
+      case(ExpressionNodeKind::value):
+          new(&data) Value(std::move(rhs.data.value));
+          break;
+      case(ExpressionNodeKind::identifier):
+          new(&data) Identifier(std::move(rhs.data.identifier));
+          break;
+      case(ExpressionNodeKind::list):
+          new(&data) ExpressionList(std::move(rhs.data.list));
+          break;
+      case(ExpressionNodeKind::statement_list):
+          new(&data) StatementList(std::move(rhs.data.statement_list));
+          break;
+        }
+
+
+      left  = std::move(rhs.left );
+      right = std::move(rhs.right);
     }
 
-
-  left  = std::move(rhs.left );
-  right = std::move(rhs.right);
 
   return *this;
 }

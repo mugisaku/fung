@@ -98,7 +98,11 @@ public:
 
   void  clear();
 
-  bool  execute(Context&  ctx) const;
+  StatementKind  get_kind() const{return kind;}
+
+  std::string const&  get_identifier() const{return identifier;}
+  Expression const&   get_expression() const{return expression;}
+
 
   void  print() const;
 

@@ -20,24 +20,27 @@ Token&
 Token::
 operator=(Token&&  rhs) noexcept
 {
-  clear();
-
-  std::swap(kind,rhs.kind);
-
-    switch(kind)
+    if(&rhs != this)
     {
-  case(TokenKind::null):
-      break;
-  case(TokenKind::integer):
-      data.integer = rhs.data.integer;
-      break;
-  case(TokenKind::identifier):
-  case(TokenKind::string):
-      new(&data) std::string(std::move(rhs.data.string));
-      break;
-  case(TokenKind::operator_):
-      data.tiny_string = rhs.data.tiny_string;
-      break;
+      clear();
+
+      std::swap(kind,rhs.kind);
+
+        switch(kind)
+        {
+      case(TokenKind::null):
+          break;
+      case(TokenKind::integer):
+          data.integer = rhs.data.integer;
+          break;
+      case(TokenKind::identifier):
+      case(TokenKind::string):
+          new(&data) std::string(std::move(rhs.data.string));
+          break;
+      case(TokenKind::operator_):
+          data.tiny_string = rhs.data.tiny_string;
+          break;
+        }
     }
 
 

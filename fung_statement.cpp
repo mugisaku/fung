@@ -49,12 +49,16 @@ Statement&
 Statement::
 operator=(Statement const&  rhs) noexcept
 {
-  clear();
+    if(&rhs != this)
+    {
+      clear();
 
-  kind = rhs.kind;
+      kind = rhs.kind;
 
-  identifier = rhs.identifier;
-  expression = rhs.expression;
+      identifier = rhs.identifier;
+      expression = rhs.expression;
+    }
+
 
   return *this;
 }
@@ -64,12 +68,16 @@ Statement&
 Statement::
 operator=(Statement&&  rhs) noexcept
 {
-  clear();
+    if(&rhs != this)
+    {
+      clear();
 
-  std::swap(kind,rhs.kind);
+      std::swap(kind,rhs.kind);
 
-  identifier = std::move(rhs.identifier);
-  expression = std::move(rhs.expression);
+      identifier = std::move(rhs.identifier);
+      expression = std::move(rhs.expression);
+    }
+
 
   return *this;
 }
@@ -99,45 +107,6 @@ clear()
   expression.reset();
 
   kind = StatementKind::null;
-}
-
-
-
-
-bool
-Statement::
-execute(Context&  ctx) const
-{
-    switch(kind)
-    {
-  case(StatementKind::null):
-      break;
-  case(StatementKind::interrupt):
-      ctx.set_interruption_flag();
-      break;
-  case(StatementKind::print):
-      printf("[print stmt] ");
-
-      expression->print();
-
-      printf(" -> ");
-
-      expression->evaluate(ctx).print();
-
-      printf("\n");
-      break;
-  case(StatementKind::let):
-      ctx.entry(identifier,expression);
-      break;
-  case(StatementKind::return_):
-      ctx.hold_returned_value(expression->evaluate(ctx));
-
-      return false;
-      break;
-    }
-
-
-  return true;
 }
 
 

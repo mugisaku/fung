@@ -135,9 +135,16 @@ read_token(pointer  p, list  ls)->list
 
 
 function
+t(pointer  p, list  ls)->list
+{
+  return *p? t(p+1,ls+*p):ls;
+}
+
+
+function
 main(string  s)->integer
 {
-  return 0;
+  return t(s.pointer,list());
 }
 
 
