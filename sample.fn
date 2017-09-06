@@ -104,31 +104,38 @@ read_token(pointer  p, list  buffer)->list
 
   return (c == 0)?
          {
-           return buffer;
+           return list(skiped_p,buffer);
          }
 
       :isident0(c)?
         {
           let  res = read_identifier(skiped_p,"");
 
-          print res;
-          print res[0];
-
-          return read_token(res[0],buffer+res[1]);
+          return list(res[0],buffer+res[1]);
         }
 
       :
         {
-          return read_token(p+1,buffer+c);
+          return list(skiped_p+1,buffer+c);
         }
       ;
 }
 
 
 function
+run_read_token(pointer  p, list  buffer)->list
+{
+  let      res = read_token(p,buffer);
+  let  new_buf = buffer+res[1];
+
+  return *p? run_read_token(res[0],new_buf):new_buf;
+}
+
+
+function
 main(string  s)->list
 {
-  return read_token(s.pointer,list());
+  return run_read_token(s.pointer,list());
 }
 
 

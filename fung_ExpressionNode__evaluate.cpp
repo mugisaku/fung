@@ -137,13 +137,6 @@ Value
 ExpressionNode::
 sus(Context&  ctx, Value const&  lv) const
 {
-    if((lv != ValueKind::list  ) &&
-       (lv != ValueKind::string))
-    {
-      throw Error("添字アクセスするものが、リストでも文字列でもない");
-    }
-       
-
   auto  rv = right->evaluate(ctx,true).convert_to_integer();
 
     if(rv != ValueKind::integer)

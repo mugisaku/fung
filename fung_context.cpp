@@ -49,12 +49,15 @@ void
 Context::
 check_depth() const
 {
-  constexpr int  limit = 1000;
+  constexpr int  limit = 4000;
 
     if(stack_count > limit)
     {
       throw Error("呼び出し深度が%dを越えた",limit);
     }
+
+
+//  printf("%zd\n",stack_count);
 }
 
 

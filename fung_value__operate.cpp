@@ -206,8 +206,9 @@ Value
 Value::
 sus(Value const&  v, size_t  i)
 {
-  return (v == ValueKind::string)? Value(v->string.at(i))
-        :(v == ValueKind::string)? Value(v->list.at(i))
+  return (v == ValueKind::string )? Value::der(Value(Pointer(v->string,i)))
+        :(v == ValueKind::list   )? Value::der(Value(Pointer(v->list  ,i)))
+        :(v == ValueKind::pointer)? Value::der(Value(v->pointer+i))
         :undefined;
 }
 
@@ -234,7 +235,13 @@ template<typename  T>
 Value
 dereference(T&  t, size_t  i)
 {
-  return t.test()? Value(t.branch().at(i)):undefined;
+    if(!t.test())
+    {
+      throw Error("参照先はもはや有効ではない");
+    }
+
+
+ return Value(t.branch().at(i));
 }
 
 
@@ -242,6 +249,22 @@ Value
 Value::
 der(Value const&  lhs)
 {
+    if(lhs == ValueKind::list)
+    {
+      Value  v(Pointer(lhs->list));
+
+      return Value::der(v);
+    }    
+
+  else
+    if(lhs == ValueKind::string)
+    {
+      Value  v(Pointer(lhs->string));
+
+      return Value::der(v);
+    }
+
+  else
     if(lhs == ValueKind::pointer)
     {
       auto&  ptr = lhs->pointer;
@@ -249,6 +272,7 @@ der(Value const&  lhs)
            if(ptr == PointerKind::string){return dereference(ptr->string_bud,ptr.get_index());}
       else if(ptr == PointerKind::list  ){return dereference(ptr->list_bud  ,ptr.get_index());}
       else if(ptr == PointerKind::null  ){throw Error("NULLPTRを参照した");}
+      else{throw Error("不明なポインタ");}
     }
 
   else

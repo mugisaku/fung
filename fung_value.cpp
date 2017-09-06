@@ -213,7 +213,7 @@ print() const
 
               while(it != end)
               {
-                printf(",");
+                printf(" ");
 
                 it++->print();
               }
