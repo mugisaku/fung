@@ -12,8 +12,8 @@ namespace fung{
 
 
 
-Constant::
-Constant(ValueKind  k, std::string&&  name_, ExpressionList&&  ls):
+Variable::
+Variable(ValueKind  k, std::string&&  name_, ExpressionList&&  ls):
 value_kind(k),
 name(std::move(name_)),
 expression_list(std::move(ls)),
@@ -22,8 +22,8 @@ value(ValueKind::unevaluated)
 }
 
 
-Constant::
-Constant(std::string&&  name_, Value&&  v):
+Variable::
+Variable(std::string&&  name_, Value&&  v):
 value_kind(v.get_kind()),
 name(std::move(name_)),
 value(std::move(v))
@@ -34,7 +34,7 @@ value(std::move(v))
 
 
 Value const&
-Constant::
+Variable::
 get_value(std::unique_ptr<GlobalSpace> const&  gsp)
 {
     if(value == ValueKind::unevaluated)
@@ -100,7 +100,7 @@ get_value(std::unique_ptr<GlobalSpace> const&  gsp)
 
 
 void
-Constant::
+Variable::
 print() const
 {
   printf("%s %s",Value::to_string(value_kind).data(),name.data());

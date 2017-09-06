@@ -19,21 +19,6 @@ class GlobalSpace;
 struct
 Variable
 {
-  std::string  name;
-
-  Value  value;
-
-  Variable(std::string const&  name_, Value const&  v): name(name_), value(v){}
-
-};
-
-
-using VariableList = std::vector<Variable>;
-
-
-struct
-Constant
-{
   ValueKind  value_kind;
 
   std::string  name;
@@ -42,8 +27,8 @@ Constant
 
   Value  value;
 
-  Constant(ValueKind  k, std::string&&  name_, ExpressionList&&  ls);
-  Constant(std::string&&  name_, Value&&  v);
+  Variable(ValueKind  k, std::string&&  name_, ExpressionList&&  ls);
+  Variable(std::string&&  name_, Value&&  v);
 
   Value const&  get_value(std::unique_ptr<GlobalSpace> const&  gsp);
 

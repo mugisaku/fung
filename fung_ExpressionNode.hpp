@@ -4,7 +4,7 @@
 
 #include"fung_value.hpp"
 #include"fung_identifier.hpp"
-#include"fung_statement.hpp"
+#include"fung_FunctionBody.hpp"
 #include"fung_Expression.hpp"
 #include<vector>
 
@@ -68,7 +68,8 @@ ExpressionNodeKind
 
   value,
   identifier,
-  statement_list,
+
+  function_body,
 
   list,
  
@@ -82,7 +83,7 @@ ExpressionNodeData
   Value            value;
   Identifier  identifier;
 
-  StatementList  statement_list;
+  FunctionBody const*  function_body;
 
   ExpressionList  list;
 
@@ -120,7 +121,7 @@ public:
   explicit ExpressionNode(Value&&  v);
   explicit ExpressionNode(PairedExpression&&  p);
   explicit ExpressionNode(ExpressionList&&  ls);
-  explicit ExpressionNode(StatementList&&  stmtls);
+  explicit ExpressionNode(FunctionBody const&  fnbd);
   ExpressionNode(Mnemonic  mn, Expression&&  l=Expression(),
                                Expression&&  r=Expression());
   ExpressionNode(ExpressionNode const&  rhs) noexcept{*this = rhs;}
@@ -179,7 +180,9 @@ isexpr(char  c)
 
 List  to_list(ExpressionList const&  ls, Context&  ctx);
 
-ExpressionList  read_expression_list(Cursor&  cur);
+class GlobalSpace;
+
+ExpressionList  read_expression_list(GlobalSpace&  sp, Cursor&  cur);
 
 
 }

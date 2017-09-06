@@ -72,14 +72,7 @@ isidentn(integer  c)->boolean
 
 
 function
-step_read_identifier(pointer  p, string  s)->list
-{
-  return isidentn(*p)? read_identifier(p+1,s+*p):list(p,s);
-}
-
-
-function
-run_read_identifier(pointer  p, list  ls)->list
+read_identifier(pointer  p, string  s)->list
 {
   return isidentn(*p)? read_identifier(p+1,s+*p):list(p,s);
 }
@@ -103,7 +96,7 @@ skip_spaces(pointer  p)->pointer
 
 
 function
-read_token(pointer  p, list  ls)->list
+read_token(pointer  p, list  buffer)->list
 {
   let  skiped_p = skip_spaces(p);
 
@@ -111,40 +104,31 @@ read_token(pointer  p, list  ls)->list
 
   return (c == 0)?
          {
-           return list(p,ls);
+           return buffer;
          }
 
       :isident0(c)?
         {
-          let  res = run_read_identifier(p,ls);
+          let  res = read_identifier(skiped_p,"");
 
-          return list(res[0],ls+res[1]);
-        }
+          print res;
+          print res[0];
 
-      :(n == '0')?
-        {
-          return list(p,ls);
+          return read_token(res[0],buffer+res[1]);
         }
 
       :
         {
-          return list(p,ls);
+          return read_token(p+1,buffer+c);
         }
       ;
 }
 
 
 function
-t(pointer  p, list  ls)->list
+main(string  s)->list
 {
-  return *p? t(p+1,ls+*p):ls;
-}
-
-
-function
-main(string  s)->integer
-{
-  return t(s.pointer,list());
+  return read_token(s.pointer,list());
 }
 
 

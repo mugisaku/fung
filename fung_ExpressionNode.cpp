@@ -46,10 +46,10 @@ kind(ExpressionNodeKind::list)
 
 
 ExpressionNode::
-ExpressionNode(StatementList&&  stmtls):
-kind(ExpressionNodeKind::statement_list)
+ExpressionNode(FunctionBody const&  fnbd):
+kind(ExpressionNodeKind::function_body)
 {
-  new(&data) StatementList(std::move(stmtls));
+  data.function_body = &fnbd;
 }
 
 
@@ -91,8 +91,8 @@ operator=(ExpressionNode const&  rhs) noexcept
       case(ExpressionNodeKind::identifier):
           new(&data) Identifier(rhs.data.identifier);
           break;
-      case(ExpressionNodeKind::statement_list):
-          new(&data) StatementList(rhs.data.statement_list);
+      case(ExpressionNodeKind::function_body):
+          data.function_body = rhs.data.function_body;
           break;
       case(ExpressionNodeKind::list):
           new(&data) ExpressionList(rhs.data.list);
@@ -137,8 +137,8 @@ operator=(ExpressionNode&&  rhs) noexcept
       case(ExpressionNodeKind::list):
           new(&data) ExpressionList(std::move(rhs.data.list));
           break;
-      case(ExpressionNodeKind::statement_list):
-          new(&data) StatementList(std::move(rhs.data.statement_list));
+      case(ExpressionNodeKind::function_body):
+          data.function_body = rhs.data.function_body;
           break;
         }
 
@@ -164,6 +164,7 @@ clear()
   case(ExpressionNodeKind::operator_):
   case(ExpressionNodeKind::operation):
   case(ExpressionNodeKind::paired):
+  case(ExpressionNodeKind::function_body):
       break;
   case(ExpressionNodeKind::value):
       data.value.~Value();
@@ -173,9 +174,6 @@ clear()
       break;
   case(ExpressionNodeKind::list):
       data.list.~vector();
-      break;
-  case(ExpressionNodeKind::statement_list):
-      data.statement_list.~vector();
       break;
     }
 
@@ -308,12 +306,14 @@ print() const
 
       printf(")");
       break;
-  case(ExpressionNodeKind::statement_list):
+  case(ExpressionNodeKind::function_body):
       printf("{");
 
         {
-          auto   it = data.statement_list.cbegin();
-          auto  end = data.statement_list.cend();
+          auto&  ls = data.function_body->get_statement_list();
+
+          auto   it = ls.cbegin();
+          auto  end = ls.cend();
 
             if(it != end)
             {
@@ -365,7 +365,7 @@ print_mnemonic(Mnemonic  mn)
   case(Mnemonic::log_not): s = "!";break;
   case(Mnemonic::neg): s = "-";break;
   case(Mnemonic::cho): s = "?";break;
-  case(Mnemonic::sus): s = "";break;
+  case(Mnemonic::sus): s = "[]";break;
   case(Mnemonic::cal): s = "";break;
   case(Mnemonic::acc): s = ".";break;
   case(Mnemonic::der): s = "*";break;

@@ -12,6 +12,36 @@ namespace fung{
 
 Value
 Value::
+convert_to(ValueKind  k) const
+{
+    switch(k)
+    {
+  case(ValueKind::null):
+  case(ValueKind::function):
+      break;
+  case(ValueKind::undefined):
+      break;
+  case(ValueKind::boolean):
+      return convert_to_boolean();
+      break;
+  case(ValueKind::integer):
+      return convert_to_integer();
+      break;
+  case(ValueKind::character):
+      break;
+  case(ValueKind::string):
+      break;
+  case(ValueKind::list):
+      break;
+    }
+
+
+  return undefined;
+}
+
+
+Value
+Value::
 convert_to_boolean() const
 {
     switch(kind)

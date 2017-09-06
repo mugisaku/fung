@@ -202,6 +202,8 @@ print() const
       break;
   case(ValueKind::list):
       {
+        printf("LIST(");
+
         auto   it = data.list.cbegin();
         auto  end = data.list.cend();
 
@@ -216,6 +218,9 @@ print() const
                 it++->print();
               }
           }
+
+
+        printf(")");
       }
       break;
     }
@@ -246,6 +251,7 @@ std::string const&
 Value::
 to_string(ValueKind  k)
 {
+  static std::string  const nu("null");
   static std::string  const i("integer");
   static std::string  const s("string");
   static std::string  const b("boolean");
@@ -256,15 +262,17 @@ to_string(ValueKind  k)
   static std::string  const n("unevaluated");
   static std::string  const f("function");
   static std::string  const p("pointer");
+  static std::string  const e("error");
 
     switch(k)
     {
   case(ValueKind::null):
       break;
   case(ValueKind::unevaluated):
-      return n;
+      return nu;
       break;
   case(ValueKind::undefined):
+      return u;
       break;
   case(ValueKind::boolean):
       return b;
@@ -293,7 +301,7 @@ to_string(ValueKind  k)
     }
 
 
-  return u;
+  return e;
 }
 
 

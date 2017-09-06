@@ -4,7 +4,7 @@
 
 #include"fung_value.hpp"
 #include"fung_error.hpp"
-#include"fung_function.hpp"
+#include"fung_FunctionBody.hpp"
 #include"fung_variable.hpp"
 #include<vector>
 
@@ -28,24 +28,26 @@ ExecutionFrame
 {
   std::string const&  function_name;
 
-  Function const*  function=nullptr;
+  FunctionBody const&  function_body;
 
-  VariableList  argument_list;
-  VariableList  variable_list;
+  ValueKind  return_value_kind=ValueKind::null;
 
-  FunctionBody::const_iterator    begin;
-  FunctionBody::const_iterator  current;
-  FunctionBody::const_iterator      end;
+  std::vector<Variable>  argument_list;
+  std::vector<Variable>  variable_list;
+
+  StatementList::const_iterator  current;
 
   void  update_argument_list(List&&  valls);
 
+  ExecutionFrame const*  parent=nullptr;
+
 public:
   ExecutionFrame(std::string const&  fn_name, Function const&  fn, List&&  valls);
-  ExecutionFrame(StatementList const&  stmtls);
+  ExecutionFrame(FunctionBody const&  body, ExecutionFrame const*  parent_=nullptr);
 
   std::string const&  get_function_name() const{return function_name;}
 
-  Function const*  get_function() const{return function;}
+  FunctionBody const&  get_function_body() const{return function_body;}
 
   void  append_variable(Variable&&  var);
 

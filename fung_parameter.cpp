@@ -1,4 +1,5 @@
 #include"fung_parameter.hpp"
+#include"fung_variable.hpp"
 
 
 

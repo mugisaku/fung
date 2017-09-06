@@ -32,8 +32,9 @@ add_i(Value const&  lhs, Value const&  rhs)
 Value
 add_s(Value const&  lhs, Value const&  rhs)
 {
-  return (rhs == ValueKind::integer)? Value(lhs->string+rhs->integer):
-         (rhs == ValueKind::string )? Value(lhs->string+rhs->string ):
+  return (rhs == ValueKind::integer  )? Value(lhs->string+rhs->integer  ):
+         (rhs == ValueKind::character)? Value(lhs->string+rhs->character):
+         (rhs == ValueKind::string   )? Value(lhs->string+rhs->string   ):
            undefined;
 }
 }

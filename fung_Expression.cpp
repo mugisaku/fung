@@ -1,5 +1,6 @@
 #include"fung_Expression.hpp"
 #include"fung_ExpressionNode.hpp"
+#include"fung_variable.hpp"
 
 
 namespace fung{

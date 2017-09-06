@@ -58,17 +58,23 @@ process_function(Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
 
           skip_spaces_and_newline(cur);
 
-          FunctionBody  body;
+          StatementList  stmtls;
+
+          auto  fnbody = new FunctionBody;
+
+          gsp->append_function_body(fnbody);
 
             if(*cur == '{')
             {
               cur += 1;
 
-              body = read_statement_list(cur,id);
+              fnbody->reset(read_statement_list(*gsp,cur,id));
             }
 
 
-          gsp->append_function(std::move(id),new Function(*gsp,std::move(parals),Value::to_kind(return_type),std::move(body)));
+          auto  fn = new Function(std::move(parals),Value::to_kind(return_type),fnbody);
+
+          gsp->append_function(std::move(id),fn);
         }
 
       else
@@ -107,10 +113,10 @@ process_constant(ValueKind  k, Cursor&  cur, std::unique_ptr<GlobalSpace>&  gsp)
 
   cur += 1;
 
-  auto  exprls = read_expression_list(cur);
+  auto  exprls = read_expression_list(*gsp,cur);
 
 
-  gsp->append_constant(new Constant(k,std::move(id),std::move(exprls)));
+  gsp->append_variable(new Variable(k,std::move(id),std::move(exprls)));
 }
 
 

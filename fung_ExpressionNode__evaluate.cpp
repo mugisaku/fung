@@ -21,7 +21,7 @@ tail_call(Context&  ctx) const
       auto&  id = (*left )->identifier.string;
       auto   rv = (*right).evaluate(ctx,true);
 
-      auto&  function_name = ctx->back().get_function_name();
+      auto&  function_name = ctx->front().get_function_name();
 
         if((id == function_name) && (rv == ValueKind::list))
         {
@@ -128,12 +128,6 @@ cal(Context&  ctx, Value const&  lv) const
   auto  flag = left->get_kind() == ExpressionNodeKind::identifier;      
 
   auto&  name = flag? (*left)->identifier.string:fn_name;
-
-    if(flag && (ctx->back().get_function_name() == name))
-    {
-      return Value(TailCalling(std::move(rv->list)));
-    }
-
 
   return ctx.call(name,*lv->function,std::move(rv->list));
 }
@@ -308,8 +302,8 @@ evaluate(Context&  ctx, bool  multi) const
   case(ExpressionNodeKind::list):
       return Value(to_list(data.list,ctx));
       break;
-  case(ExpressionNodeKind::statement_list):
-      return ctx.call(data.statement_list);
+  case(ExpressionNodeKind::function_body):
+      return ctx.call(*data.function_body);
       break;
     }
 

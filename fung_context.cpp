@@ -15,15 +15,15 @@ Value
 Context::
 run(std::string const&  function_name, List&&  args)
 {
-  auto&  c = global_space->find_constant(function_name);
+  auto&  v = global_space->find(function_name);
 
-    if(!c)
+    if(!v)
     {
       throw Error("開始関数に指定した%sが見つからない",function_name.data());
     }
 
 
-    if(c->value_kind != ValueKind::function)
+    if(v->value_kind != ValueKind::function)
     {
       throw Error("%sは関数ではない",function_name.data());
     }
@@ -31,9 +31,11 @@ run(std::string const&  function_name, List&&  args)
 
 
 
-  auto&  fn = *c->value->function;
+  auto&  fn = *v->value->function;
 
   frame_stack.clear();
+
+  stack_count = 0;
 
   interruption_flag = false;
 
@@ -49,7 +51,7 @@ check_depth() const
 {
   constexpr int  limit = 1000;
 
-    if(frame_stack.size() > limit)
+    if(stack_count > limit)
     {
       throw Error("呼び出し深度が%dを越えた",limit);
     }
@@ -63,11 +65,15 @@ call(std::string const&  fn_name, Function const&  fn, List&&  args)
   check_depth();
 
 
-  frame_stack.emplace_back(fn_name,fn,std::move(args));
+  frame_stack.emplace_front(fn_name,fn,std::move(args));
+
+  ++stack_count;
 
   auto  retval = start();
 
-  frame_stack.pop_back();
+  frame_stack.pop_front();
+
+  --stack_count;
 
   return std::move(retval);
 }
@@ -75,16 +81,20 @@ call(std::string const&  fn_name, Function const&  fn, List&&  args)
 
 Value
 Context::
-call(StatementList const&  stmtls)
+call(FunctionBody const&  fnbody)
 {
   check_depth();
 
 
-  frame_stack.emplace_back(stmtls);
+  frame_stack.emplace_front(fnbody,&frame_stack.front());
+
+  ++stack_count;
 
   auto  retval = start();
 
-  frame_stack.pop_back();
+  frame_stack.pop_front();
+
+  --stack_count;
 
   return std::move(retval);
 }
@@ -94,7 +104,7 @@ Value
 Context::
 start()
 {
-  auto&  xframe = frame_stack.back();
+  auto&  xframe = frame_stack.front();
 
   Value  returned_value;
 
@@ -133,7 +143,17 @@ void
 Context::
 entry(std::string const&  name, Expression const&  expr)
 {
-  frame_stack.back().append_variable(Variable(name,expr->evaluate(*this)));
+  auto  v = expr->evaluate(*this);
+
+/*
+printf("[entry] ");
+v.print();
+printf(" <- ");
+expr->print();
+printf("\n");
+*/
+
+  frame_stack.front().append_variable(Variable(std::string(name),std::move(v)));
 }
 
 
@@ -141,18 +161,7 @@ void
 Context::
 entry(std::string const&  name, Value const&  val)
 {
-  frame_stack.back().append_variable(Variable(name,val));
-}
-
-
-void
-Context::
-entry(ParameterList const&  parals, List const&  ls)
-{
-  auto&  frm = frame_stack.back();
-
-  auto&  fn_name = frm.get_function_name();
-
+  frame_stack.front().append_variable(Variable(std::string(name),Value(val)));
 }
 
 
@@ -162,7 +171,7 @@ Value
 Context::
 find_value(std::string const&  name) const
 {
-  auto  var = frame_stack.back().find_variable(name);
+  auto  var = frame_stack.front().find_variable(name);
 
     if(var)
     {
@@ -180,9 +189,9 @@ operator[](std::string const&  name) const
 {
   char const*  prefix = "無名関数";
 
-    if(frame_stack.size())
+    if(stack_count)
     {
-      auto&  f = frame_stack.back();
+      auto&  f = frame_stack.front();
 
       prefix = f.get_function_name().data();
 
@@ -197,11 +206,11 @@ operator[](std::string const&  name) const
 
     if(global_space)
     {
-      auto&  con = global_space->find_constant(name);
+      auto&  v = global_space->find(name);
 
-        if(con)
+        if(v)
         {
-          return con->get_value(global_space);
+          return v->get_value(global_space);
         }
     }
 

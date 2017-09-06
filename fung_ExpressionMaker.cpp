@@ -65,11 +65,11 @@ operator<(Mnemonic  a, Mnemonic  b)
 
 
 Expression
-read_either_expression(Cursor&  cur)
+read_either_expression(GlobalSpace&  sp, Cursor&  cur)
 {
   auto  currec = cur;
 
-  ExpressionMaker  mk;
+  ExpressionMaker  mk(sp);
 
   auto  l = mk(cur,"条件演算の第一式");
 
@@ -88,11 +88,11 @@ read_either_expression(Cursor&  cur)
 
 
 Expression
-read_postfix_expression(Cursor&  cur, Expression&&  expr)
+read_postfix_expression(GlobalSpace&  sp, Cursor&  cur, Expression&&  expr)
 {
   skip_spaces_and_newline(cur);
 
-  ExpressionMaker  mk;
+  ExpressionMaker  mk(sp);
 
     if(*cur == '(')
     {
@@ -124,7 +124,7 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
 
       expr = Expression(ExpressionNode(Mnemonic::cal,std::move(l),std::move(r)));
 
-      return read_postfix_expression(cur,std::move(expr));
+      return read_postfix_expression(sp,cur,std::move(expr));
     }
 
   else
@@ -143,7 +143,7 @@ read_postfix_expression(Cursor&  cur, Expression&&  expr)
 
       expr = Expression(ExpressionNode(Mnemonic::sus,std::move(l),std::move(r)));
 
-      return read_postfix_expression(cur,std::move(expr));
+      return read_postfix_expression(sp,cur,std::move(expr));
     }
 
 
@@ -188,7 +188,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
 
     if(o.compare('('))
     {
-      ExpressionMaker  mk;
+      ExpressionMaker  mk(space);
 
       auto  expr = mk(cur,"式リスト");
 
@@ -198,7 +198,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
         }
 
 
-      expr = read_postfix_expression(cur,std::move(expr));
+      expr = read_postfix_expression(space,cur,std::move(expr));
 
       push_operand(std::move(expr));
     }
@@ -206,11 +206,13 @@ process_operator(Cursor&  cur, TinyString const&  o)
   else
     if(o.compare('{'))
     {
-      auto  stmtls = read_statement_list(cur,"関数内関数");
+      auto  fnbody = new FunctionBody(read_statement_list(space,cur,"関数内関数"));
 
-      auto  expr = Expression(ExpressionNode(std::move(stmtls)));
+      space.append_function_body(fnbody);
+
+      auto  expr = Expression(ExpressionNode(*fnbody));
       
-      expr = read_postfix_expression(cur,std::move(expr));
+      expr = read_postfix_expression(space,cur,std::move(expr));
 
       push_operand(std::move(expr));
     }
@@ -235,7 +237,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
   else
     if(o.compare('?'))
     {
-      auto  expr = read_either_expression(cur);
+      auto  expr = read_either_expression(space,cur);
 
         while(binop_stack.size())
         {
@@ -322,7 +324,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
     {
       Expression  expr(ExpressionNode(Value(static_cast<int>(tok->integer))));
 
-      expr = read_postfix_expression(cur,std::move(expr));
+      expr = read_postfix_expression(space,cur,std::move(expr));
 
       push_operand(std::move(expr));
     }
@@ -332,7 +334,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
     {
       Expression  expr(ExpressionNode(Value(std::move(tok->string))));
 
-      expr = read_postfix_expression(cur,std::move(expr));
+      expr = read_postfix_expression(space,cur,std::move(expr));
 
       push_operand(std::move(expr));
     }
@@ -356,9 +358,9 @@ step_first_phase(Cursor&  cur, Token&&  tok)
 
           cur += 1;
 
-          auto  expr = Expression(ExpressionNode(read_expression_list(cur)));
+          auto  expr = Expression(ExpressionNode(read_expression_list(space,cur)));
 
-          expr = read_postfix_expression(cur,std::move(expr));
+          expr = read_postfix_expression(space,cur,std::move(expr));
 
           push_operand(std::move(expr));
         }
@@ -369,7 +371,7 @@ step_first_phase(Cursor&  cur, Token&&  tok)
 
           Expression  expr(ExpressionNode(std::move(id)));
 
-          expr = read_postfix_expression(cur,std::move(expr));
+          expr = read_postfix_expression(space,cur,std::move(expr));
 
           push_operand(std::move(expr));
         }
@@ -411,7 +413,7 @@ step_last_phase(std::vector<Expression>&  buf, Expression&&  e)
 {
     if((*e == ExpressionNodeKind::value         ) ||
        (*e == ExpressionNodeKind::list          ) ||
-       (*e == ExpressionNodeKind::statement_list) ||
+       (*e == ExpressionNodeKind::function_body ) ||
        (*e == ExpressionNodeKind::operation     ) ||
        (*e == ExpressionNodeKind::paired        ) ||
        (*e == ExpressionNodeKind::identifier    ))

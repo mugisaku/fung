@@ -1,5 +1,7 @@
 #include"fung_ExecutionFrame.hpp"
+#include"fung_function.hpp"
 #include"fung_context.hpp"
+#include"fung_variable.hpp"
 
 
 
@@ -12,10 +14,9 @@ namespace fung{
 ExecutionFrame::
 ExecutionFrame(std::string const&  fn_name, Function const&  fn, List&&  valls):
 function_name(fn_name),
-function(&fn),
-begin(fn.get_body().cbegin()),
-current(fn.get_body().cbegin()),
-end(fn.get_body().cend())
+function_body(*fn.get_body()),
+return_value_kind(fn.get_return_value_kind()),
+current(fn.get_body()->get_statement_list().cbegin())
 {
   auto&  parals = fn.get_parameter_list();
 
@@ -29,27 +30,38 @@ end(fn.get_body().cend())
 
     for(auto&  para: parals)
     {
-        if(para.get_value_kind() != it->get_kind())
-        {
-          auto&  a = Value::to_string(para.get_value_kind());
-          auto&  b = Value::to_string(       it->get_kind());
+      auto  v = std::move(*it++);
 
-          throw Error("%s %s <- %s 引数の型が一致しない",fn_name.data(),a.data(),b.data());
+        if(para.get_value_kind() != v.get_kind())
+        {
+          v = v.convert_to(para.get_value_kind());
+          
+            if(para.get_value_kind() != v.get_kind())
+            {
+              auto&  a = Value::to_string(para.get_value_kind());
+              auto&  b = Value::to_string(         v.get_kind());
+
+              throw Error("ExecutionFrame: %s, %s <- %s 引数の型が一致しないか、変換不可",fn_name.data(),a.data(),b.data());
+            }
         }
 
 
-      argument_list.emplace_back(para.get_name(),std::move(*it++));
+      argument_list.emplace_back(std::string(para.get_name()),std::move(v));
     }
 }
 
 
+namespace{
+std::string  const unnamed("無名関数");
+}
+
+
 ExecutionFrame::
-ExecutionFrame(StatementList const&  stmtls):
-function_name(""),
-function(nullptr),
-begin(stmtls.cbegin()),
-current(stmtls.cbegin()),
-end(stmtls.cend())
+ExecutionFrame(FunctionBody const&  body, ExecutionFrame const*  parent_):
+function_name(unnamed),
+function_body(body),
+current(body.get_statement_list().cbegin()),
+parent(parent_)
 {
 }
 
@@ -108,7 +120,7 @@ find_variable(std::string const&  name) const
     }
 
 
-  return nullptr;
+  return parent? parent->find_variable(name):nullptr;
 }
 
 
@@ -116,7 +128,7 @@ ExecutionResult
 ExecutionFrame::
 step(Context&  ctx, Value&  retval_buf)
 {
-    if(current == end)
+    if(current == function_body.get_statement_list().cend())
     {
       return ExecutionResult::error;
     }
@@ -152,12 +164,31 @@ step(Context&  ctx, Value&  retval_buf)
         {
 //          printf("末尾再帰最適化!\n");
 
-          current = begin;
+          current = function_body.get_statement_list().cbegin();
 
           update_argument_list(std::move(retval_buf->list));
 
 
           return ExecutionResult::no_value_was_returned;
+        }
+
+
+      auto  k = return_value_kind;
+
+        if(k != ValueKind::null)
+        {
+            if(retval_buf.get_kind() != k)
+            {
+              retval_buf = retval_buf.convert_to(k);
+
+                if(retval_buf.get_kind() != k)
+                {
+                  auto&  a = Value::to_string(k);
+                  auto&  b = Value::to_string(retval_buf.get_kind());
+
+                  throw Error("返り値の型が一致しないか、変換不可 %s <- %s",a.data(),b.data());
+                }
+            }
         }
 
 

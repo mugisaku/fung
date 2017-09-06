@@ -111,9 +111,10 @@ public:
 
 using StatementList = std::vector<Statement>;
 
+class GlobalSpace;
 class Cursor;
 
-StatementList  read_statement_list(Cursor&  cur, std::string const&  fn_name);
+StatementList  read_statement_list(GlobalSpace&  sp, Cursor&  cur, std::string const&  fn_name);
 
 }
 

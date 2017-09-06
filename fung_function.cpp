@@ -34,11 +34,14 @@ print() const
 
   printf(")->%s\n{\n",Value::to_string(return_value_kind).data());
 
-    for(auto&  stmt: body)
+    if(body)
     {
-      stmt.print();
+        for(auto&  stmt: body->get_statement_list())
+        {
+          stmt.print();
 
-      printf("\n");
+          printf("\n");
+        }
     }
 
 

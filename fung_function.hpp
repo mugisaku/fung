@@ -2,10 +2,9 @@
 #define FUNG_Function_HPP_INCLUDED
 
 
-#include"fung_statement.hpp"
+#include"fung_FunctionBody.hpp"
 #include"fung_ExpressionNode.hpp"
 #include"fung_parameter.hpp"
-#include"fung_space.hpp"
 #include"fung_variable.hpp"
 #include<string>
 #include<initializer_list>
@@ -17,30 +16,27 @@ namespace fung{
 class Context;
 
 
-using FunctionBody = StatementList;
-
-
-
 class
-Function: public Space
+Function
 {
   ParameterList  parameter_list;
 
   ValueKind  return_value_kind;
 
-  FunctionBody  body;
+  FunctionBody const*  body;
 
 public:
-  Function(Space&  parent_sp, ParameterList&&  parals, ValueKind  retval_k, FunctionBody&&  body_):
-  Space(parent_sp),
+  Function(ParameterList&&  parals, ValueKind  retval_k, FunctionBody const*  body_=nullptr):
   parameter_list(std::move(parals)),
   return_value_kind(retval_k),
-  body(std::move(body_)){}
+  body(body_){}
 
+
+  ValueKind  get_return_value_kind() const{return return_value_kind;}
 
   ParameterList const&  get_parameter_list() const{return parameter_list;}
 
-  FunctionBody const&  get_body() const{return body;}
+  FunctionBody const*  get_body() const{return body;}
 
   void  print() const;
 

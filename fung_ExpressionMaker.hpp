@@ -13,11 +13,14 @@ namespace fung{
 
 
 class TinyString;
+class GlobalSpace;
 
 
 class
 ExpressionMaker
 {
+  GlobalSpace&  space;
+
   std::vector<char>       unop_stack;
   std::vector<Mnemonic>  binop_stack;
 
@@ -40,6 +43,8 @@ ExpressionMaker
   void  push_operand(Expression&&  expr);
 
 public:
+  ExpressionMaker(GlobalSpace&  gsp): space(gsp){}
+
   Expression  operator()(Cursor&  cur, char const*  onerr_msg="");
 
   TinyString const&  get_last_operator() const{return last_operator;}

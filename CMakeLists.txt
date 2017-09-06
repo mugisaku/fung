@@ -57,7 +57,6 @@ set(SOURCES
   fung_value__get_property.cpp
   fung_value__operate.cpp
   fung_value__convert.cpp
-  fung_space.cpp
   fung_context.cpp
   fung_variable.cpp
   fung_GlobalSpace.cpp

@@ -87,6 +87,8 @@ public:
 
   ValueKind  get_kind() const{return kind;}
 
+  Value  convert_to(ValueKind  k) const;
+
   Value  convert_to_boolean() const;
   Value  convert_to_string() const;
   Value  convert_to_integer() const;

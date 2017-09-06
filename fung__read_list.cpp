@@ -39,7 +39,7 @@ read_parameter(Cursor&  cur)
 
 
 Statement
-read_statement(Cursor&  cur, std::string const&  fn_name)
+read_statement(GlobalSpace&  sp, Cursor&  cur, std::string const&  fn_name)
 {
   Cursor  currec = cur;
 
@@ -53,7 +53,7 @@ read_statement(Cursor&  cur, std::string const&  fn_name)
 
         if(id == "return")
         {
-          ExpressionMaker  mk;
+          ExpressionMaker  mk(sp);
 
           char  buf[256];
 
@@ -67,7 +67,7 @@ read_statement(Cursor&  cur, std::string const&  fn_name)
       else
         if(id == "print")
         {
-          ExpressionMaker  mk;
+          ExpressionMaker  mk(sp);
 
           char  buf[256];
 
@@ -108,7 +108,7 @@ read_statement(Cursor&  cur, std::string const&  fn_name)
           cur += 1;
 
 
-          ExpressionMaker  mk;
+          ExpressionMaker  mk(sp);
 
           LetStatement  let(std::move(id),mk(cur));
 
@@ -203,13 +203,13 @@ read_parameter_list(Cursor&  cur)
 
 
 ExpressionList
-read_expression_list(Cursor&  cur)
+read_expression_list(GlobalSpace&  sp, Cursor&  cur)
 {
   ExpressionList  ls;
 
     for(;;)
     {
-      ExpressionMaker  mk;
+      ExpressionMaker  mk(sp);
 
       auto  expr = mk(cur,"式リスト");
 
@@ -233,7 +233,7 @@ read_expression_list(Cursor&  cur)
 
 
 StatementList
-read_statement_list(Cursor&  cur, std::string const&  id)
+read_statement_list(GlobalSpace&  sp, Cursor&  cur, std::string const&  id)
 {
   StatementList  ls;
 
@@ -258,7 +258,7 @@ read_statement_list(Cursor&  cur, std::string const&  id)
 
       else
         {
-          auto  stmt = read_statement(cur,id);
+          auto  stmt = read_statement(sp,cur,id);
 
             if(stmt)
             {
