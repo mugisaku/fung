@@ -59,7 +59,7 @@ read_statement(GlobalSpace&  sp, Cursor&  cur, std::string const&  fn_name)
 
           snprintf(buf,sizeof(buf),"関数%s内return文:",fn_name.data());
 
-          ReturnStatement  ret(mk(cur,buf));
+          ReturnStatement  ret(mk(cur,';',buf));
 
           stmt = Statement(std::move(ret));
         }
@@ -73,7 +73,7 @@ read_statement(GlobalSpace&  sp, Cursor&  cur, std::string const&  fn_name)
 
           snprintf(buf,sizeof(buf),"関数%s内print文:",fn_name.data());
 
-          PrintStatement  prn(mk(cur,buf));
+          PrintStatement  prn(mk(cur,';',buf));
 
           stmt = Statement(std::move(prn));
         }
@@ -110,7 +110,7 @@ read_statement(GlobalSpace&  sp, Cursor&  cur, std::string const&  fn_name)
 
           ExpressionMaker  mk(sp);
 
-          LetStatement  let(std::move(id),mk(cur));
+          LetStatement  let(std::move(id),mk(cur,';'));
 
           stmt = Statement(std::move(let));
         }
@@ -211,7 +211,7 @@ read_expression_list(GlobalSpace&  sp, Cursor&  cur)
     {
       ExpressionMaker  mk(sp);
 
-      auto  expr = mk(cur,"式リスト");
+      auto  expr = mk(cur,'\0',"式リスト");
 
         if(expr)
         {
@@ -219,11 +219,23 @@ read_expression_list(GlobalSpace&  sp, Cursor&  cur)
         }
 
 
-      auto  o = mk.get_last_operator();
-
-        if(!o.compare(','))
+        if(mk.get_last_character() == ')')
         {
+          cur += 1;
+
           break;
+        }
+
+      else
+        if((mk.get_last_character() == ';') ||
+           (mk.get_last_character() == ','))
+        {
+          cur += 1;
+        }
+
+      else
+        {
+          throw Error(cur,"式リストに不明な区切り文字");
         }
     }
 

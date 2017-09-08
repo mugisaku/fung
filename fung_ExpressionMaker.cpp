@@ -71,15 +71,15 @@ read_either_expression(GlobalSpace&  sp, Cursor&  cur)
 
   ExpressionMaker  mk(sp);
 
-  auto  l = mk(cur,"条件演算の第一式");
+  auto  l = mk(cur,':',"条件演算の第一式");
 
-    if(!mk.get_last_operator().compare(':'))
+    if(mk.get_last_character() != ':')
     {
-      throw Error(currec,"三項演算の\':\'がない");
+      throw Error(cur,"\':\'がない");
     }
 
 
-  auto  r = mk(cur,"条件演算の第二式");
+  auto  r = mk(cur,0,"条件演算の第二式");
 
   auto  p = std::make_pair(std::move(l),std::move(r));
 
@@ -92,32 +92,11 @@ read_postfix_expression(GlobalSpace&  sp, Cursor&  cur, Expression&&  expr)
 {
   skip_spaces_and_newline(cur);
 
-  ExpressionMaker  mk(sp);
-
     if(*cur == '(')
     {
       cur += 1;
 
-      ExpressionList  ls;
-
-      skip_spaces_and_newline(cur);
-
-        if(*cur != ')')
-        {
-          ls.emplace_back(mk(cur));
-
-            while(!mk.get_last_operator().compare(')'))
-            {
-                if(!mk.get_last_operator().compare(','))
-                {
-                  throw Error("式リストがコンマ以外で区切られている %s",mk.get_last_operator().codes);
-                }
-
-
-              ls.emplace_back(mk(cur));
-            }
-        }
-
+      auto  ls = read_expression_list(sp,cur);
 
       auto  l = Expression(              (std::move(expr)));
       auto  r = Expression(ExpressionNode(std::move(  ls)));
@@ -132,12 +111,14 @@ read_postfix_expression(GlobalSpace&  sp, Cursor&  cur, Expression&&  expr)
     {
       cur += 1;
 
-      auto  l = Expression(std::move(expr));
-      auto  r = Expression(        mk(cur));
+      ExpressionMaker  mk(sp);
 
-        if(!mk.get_last_operator().compare(']'))
+      auto  l = Expression(std::move(expr));
+      auto  r = Expression(    mk(cur,']'));
+
+        if(mk.get_last_character() != ']')
         {
-          throw Error("\'[\'が\']\'で閉じていない");
+          throw Error(cur,"\'[\'が\']\'で閉じられいない");
         }
 
 
@@ -184,17 +165,35 @@ void
 ExpressionMaker::
 process_operator(Cursor&  cur, TinyString const&  o)
 {
-  last_operator = o;
+  Cursor  currec = cur;
 
+    if(o.compare('?'))
+    {
+      auto  expr = read_either_expression(space,cur);
+
+        while(binop_stack.size())
+        {
+          output.emplace_back(binop_stack.back());
+
+          binop_stack.pop_back();
+        }
+
+
+      output.emplace_back(std::move(expr));
+
+      output.emplace_back(Mnemonic::cho);
+    }
+
+  else
     if(o.compare('('))
     {
       ExpressionMaker  mk(space);
 
-      auto  expr = mk(cur,"式リスト");
+      auto  expr = mk(cur,')',"式リスト");
 
-        if(!mk.get_last_operator().compare(')'))
+        if(mk.get_last_character() != ')')
         {
-          throw Error("\'(\'が\')\'で閉じていない");
+          throw Error(cur,"\'(\'が\')\'で閉じられいない");
         }
 
 
@@ -220,38 +219,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
   else
     if(o.compare('['))
     {
-      throw Error("ここに'['は現れないはず");
-    }
-
-  else
-    if(o.compare(';') ||
-       o.compare(',') ||
-       o.compare(')') ||
-       o.compare(']') ||
-       o.compare('}') ||
-       o.compare(':'))
-    {
-      need_to_close = true;
-    }
-
-  else
-    if(o.compare('?'))
-    {
-      auto  expr = read_either_expression(space,cur);
-
-        while(binop_stack.size())
-        {
-          output.emplace_back(binop_stack.back());
-
-          binop_stack.pop_back();
-        }
-
-
-      output.emplace_back(std::move(expr));
-
-      output.emplace_back(Mnemonic::cho);
-
-      need_to_close = true;
+      throw Error(currec,"ここに'['は現れないはず");
     }
 
   else
@@ -291,7 +259,7 @@ process_operator(Cursor&  cur, TinyString const&  o)
       else if(o.compare('.'    )){mn = Mnemonic::acc;}
       else
         {
-          throw Error(cur,"使えない二項演算子 %s",o.codes);
+          throw Error(currec,"使えない二項演算子 %s",o.codes);
         }
 
 
@@ -390,8 +358,33 @@ void
 ExpressionMaker::
 run_first_phase(Cursor&  cur)
 {
-    while(*cur && !need_to_close)
+    for(;;)
     {
+      last_character = *cur;
+
+        if(!last_character)
+        {
+          break;
+        }
+
+      else
+        if(last_character == close_character)
+        {
+          cur += 1;
+
+          break;
+        }
+
+      else
+        if((last_character == ',') ||
+           (last_character == ';') ||
+           (last_character == ')') ||
+           (last_character == ']'))
+        {
+          break;
+        }
+
+
       auto  tok = read_token(cur);
 
       step_first_phase(cur,std::move(tok));
@@ -486,11 +479,13 @@ run_last_phase(std::vector<Expression>&&  src)
 
 Expression
 ExpressionMaker::
-operator()(Cursor&  cur, char const*  onerr_msg)
+operator()(Cursor&  cur, char  close_character_, char const*  onerr_msg)
 {
   Cursor  currec = cur;
 
   clear();
+
+  close_character = close_character_;
 
     try
     {
@@ -529,7 +524,6 @@ clear()
 
   output.clear();
 
-  need_to_close   = false;
   last_is_operand = false;
 }
 

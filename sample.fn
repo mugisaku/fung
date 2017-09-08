@@ -43,6 +43,20 @@ isxdigit(integer  c)->boolean
 
 
 function
+ctox(character  c)->integer
+{
+  return isdigit(c)? c-'0'
+         :((c == 'a') || (c == 'A'))? 10
+         :((c == 'b') || (c == 'B'))? 11
+         :((c == 'c') || (c == 'C'))? 12
+         :((c == 'd') || (c == 'D'))? 13
+         :((c == 'e') || (c == 'E'))? 14
+         :((c == 'f') || (c == 'F'))? 15
+         :0;
+}
+
+
+function
 isalpha(integer  c)->boolean
 {
   return(((c >= 'a') && (c <= 'z')) ||
@@ -89,6 +103,90 @@ isspace(integer  c)->boolean
 
 
 function
+read_binary_number(pointer  p, integer  n)->list
+{
+  let  c = *p;
+
+  return isbdigit(c)?
+         {
+           return read_binary_number(p+1,n+((c == '0')? 0:1));
+         }
+
+       :list(p,n);
+}
+
+
+function
+read_octal_number(pointer  p, integer  n)->list
+{
+  let  c = *p;
+
+  return isodigit(c)?
+         {
+           return read_octal_number(p+1,(n<<3)|(c-'0'));
+         }
+
+       :list(p,n);
+}
+
+
+function
+read_decimal_number(pointer  p, integer  n)->list
+{
+  let  c = *p;
+
+  return isdigit(c)?
+         {
+           return read_decimal_number(p+1,(n*10)+(c-'0'));
+         }
+
+       :list(p,n);
+}
+
+
+function
+read_hexadeicmal_number(pointer  p, integer  n)->list
+{
+  let  c = *p;
+
+  return isxdigit(c)?
+         {
+           return read_hexadecimal_number(p+1,(n<<4)|ctox(c));
+         }
+
+       :list(p,n);
+}
+
+
+function
+read_number_that_begins_by_zero(pointer  p)->list
+{
+  let  c = *(p+1);
+
+  return ((c == 'x') || (c == 'X'))?
+         {
+           return read_hexadecimal_number(p+1,0);
+         }
+
+       :((c == 'o') || (c == 'O'))?
+         {
+           return read_octal_number(p+1,0);
+         }
+
+       :((c == 'b') || (c == 'B'))?
+         {
+           return read_binary_number(p+1,0);
+         }
+
+       :
+         {
+           return list(p+1,0);
+         }
+       ;
+}
+
+
+function
 skip_spaces(pointer  p)->pointer
 {
   return isspace(*p)? skip_spaces(p+1):p;
@@ -110,6 +208,20 @@ read_token(pointer  p, list  buffer)->list
       :isident0(c)?
         {
           let  res = read_identifier(skiped_p,"");
+
+          return list(res[0],buffer+res[1]);
+        }
+
+      :(c == '0')?
+        {
+          let  res = read_number_that_begins_by_zero(skiped_p);
+
+          return list(res[0],buffer+res[1]);
+        }
+
+      :(isdigit(c))?
+        {
+          let  res = read_decimal_number(skiped_p,0);
 
           return list(res[0],buffer+res[1]);
         }

@@ -26,11 +26,10 @@ ExpressionMaker
 
   std::vector<Expression>  output;
 
-  bool  need_to_close;
+  char  close_character;
+  char   last_character;
 
   bool  last_is_operand;
-
-  TinyString  last_operator;
 
   void   run_first_phase(Cursor&  cur              );
   void  step_first_phase(Cursor&  cur, Token&&  tok);
@@ -43,11 +42,12 @@ ExpressionMaker
   void  push_operand(Expression&&  expr);
 
 public:
-  ExpressionMaker(GlobalSpace&  gsp): space(gsp){}
+  ExpressionMaker(GlobalSpace&  gsp):
+  space(gsp){}
 
-  Expression  operator()(Cursor&  cur, char const*  onerr_msg="");
+  Expression  operator()(Cursor&  cur, char  close_character_, char const*  onerr_msg="");
 
-  TinyString const&  get_last_operator() const{return last_operator;}
+  char  get_last_character() const{return last_character;}
 
   void  clear();
 
